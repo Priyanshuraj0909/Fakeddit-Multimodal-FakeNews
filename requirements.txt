@@ -1,0 +1,17 @@
+torch
+torchvision
+torchaudio
+transformers
+sentencepiece
+tqdm
+pandas
+numpy
+scikit-learn
+matplotlib
+seaborn
+openpyxl
+Pillow
+requests
+xgboost
+timm
+regex
