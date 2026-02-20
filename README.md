@@ -51,7 +51,7 @@ Pandas, NumPy, Matplotlib, tqdm
 
 🚀 How to Run
 Clone this repository:
-git clone https://github.com/VishalDhariwal/Fakeddit-Multimodal-FakeNews.git
+git clone https://github.com/priyanshu-gopal/Fakeddit-Multimodal-FakeNews.git
 cd fakeddit_models
 Install dependencies:
 pip install -r requirements.txt
