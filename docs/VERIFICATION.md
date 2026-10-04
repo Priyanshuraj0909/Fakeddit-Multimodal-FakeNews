@@ -1,18 +1,28 @@
-# Verification — 2026-10-04
+# FakeEdit v2 verification — 2026-10-04
 
-## Confirmed locally
+## Automated checks
 
-- Python 3.12 virtual environment installed with app, training, and test dependencies.
-- `python -m pytest -q`: 5 tests pass. One upstream Starlette/AnyIO deprecation warning.
-- API serves the homepage, JavaScript, health status, descriptive analysis, and missing-model errors.
-- Input validation rejects empty, whitespace-only, and overlength text.
-- Text-baseline training on a temporary synthetic fixture writes model/metrics artifacts and serves a prediction through the API. This checks software behavior only, not real-data accuracy.
-- Overlapping post IDs and misaligned embedding IDs are rejected.
-- JavaScript syntax and Git whitespace checks pass.
-- Browser loads meaningful content and the example submission renders a report through the live local API.
+- Python 3.12: `python -m pytest -q` — 8 tests passed, with one upstream Starlette/AnyIO deprecation warning.
+- Node.js: `npm test` — 8 tests passed.
+- `npm run check`, Python module compilation, and Git whitespace checks passed.
+- Backend tests cover homepage/static assets, input validation, missing/corrupt models, trained-artifact inference, post-ID preservation, split overlap, embedding alignment, and phrase boundaries.
+- Frontend tests cover file formats/limits, empty files, UTF-8 decoding, report metadata, incomplete API schemas, timeouts, and cancellation.
 
-## Limitations
+## Browser checks
 
-No original Fakeddit dataset, embedding arrays, or model artifacts are available locally. Real-data training, the historical accuracy claim, and full CLIP extraction/inference have not been verified. No synthetic model is shipped as a fake-news classifier. Original notebooks remain historical Colab experiments.
+`tests/browser/workspace-smoke.js` verifies the running app in Chromium:
 
-Deployment status will be reported separately after the remote build and endpoint checks.
+- Text input → API → rendered report.
+- Keyboard tab navigation and theme switching.
+- Corrupt PNG, unsupported video, and oversized-video rejection; image drag/drop.
+- Valid PNG dimensions and a generated WebM preview with playback controls.
+- Combined report attachment metadata, removal, reset, and UTF-8 file import.
+- API errors, malformed responses, retry availability, and cancelled-response suppression.
+
+Desktop dark/light and mobile screenshots were visually inspected. The mobile layout was checked for horizontal overflow. No browser JavaScript errors were reported during the verified flows.
+
+## Deployment and limits
+
+The connected production URL is https://fakeddit-multimodal-fakenews.vercel.app. GitHub Actions runs Python and frontend checks on every push; Vercel automatically redeploys `main`. The final remote build is checked after publication.
+
+Real Fakeddit training and the historical 93.9% claim have not been reproduced because the original data/embeddings/model are absent. Synthetic fixtures verify software behavior only. Media previews do not perform image/video inference. Original Colab notebooks retain historical environment assumptions documented in PROJECT_REVIEW.md.

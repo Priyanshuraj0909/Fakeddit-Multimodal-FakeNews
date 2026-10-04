@@ -2,6 +2,8 @@
 from pathlib import Path
 import json
 import os
+import logging
+from importlib.util import find_spec
 from functools import lru_cache
 
 from fastapi import FastAPI, HTTPException
@@ -13,7 +15,8 @@ from fakeddit.signals import analyze
 
 ROOT = Path(__file__).resolve().parents[1]
 MODEL_DIR = Path(os.environ.get("FAKEDDIT_MODEL_DIR", str(ROOT / "artifacts/text-baseline")))
-app = FastAPI(title="Fakeddit Research API", version="1.0.0")
+app = FastAPI(title="FakeEdit Research API", version="2.0.0")
+logger = logging.getLogger(__name__)
 
 
 class TextInput(BaseModel):
@@ -29,7 +32,12 @@ def clean_text(value: str) -> str:
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "model_available": (MODEL_DIR / "model.joblib").is_file(), "version": "1.0.0"}
+    model_available = (
+        (MODEL_DIR / "model.joblib").is_file()
+        and (MODEL_DIR / "metrics.json").is_file()
+        and all(find_spec(name) is not None for name in ("joblib", "sklearn", "numpy", "scipy"))
+    )
+    return {"status": "ok", "model_available": model_available, "version": "2.0.0"}
 
 
 @app.post("/api/analyze")
@@ -38,25 +46,30 @@ def inspect_text(payload: TextInput):
 
 
 @lru_cache(maxsize=1)
-def load_model():
+def load_model(directory: str):
     # Only load artifacts created by your own training pipeline; joblib is executable.
     import joblib
-    return joblib.load(MODEL_DIR / "model.joblib"), json.loads((MODEL_DIR / "metrics.json").read_text())
+    path = Path(directory)
+    metadata = json.loads((path / "metrics.json").read_text())
+    if not isinstance(metadata.get("labels"), dict):
+        raise ValueError("Missing model label mapping")
+    return joblib.load(path / "model.joblib"), metadata
 
 
 @app.post("/api/predict")
 def predict(payload: TextInput):
     text = clean_text(payload.text)
-    if not (MODEL_DIR / "model.joblib").is_file():
+    if not health()["model_available"]:
         raise HTTPException(503, "No trained model is installed. The text explorer remains available.")
     try:
-        model, metadata = load_model()
+        model, metadata = load_model(str(MODEL_DIR))
         probabilities = model.predict_proba([text])[0]
         labels = metadata["labels"]
         return {"mode": "trained_text_baseline", "label": labels[str(int(model.predict([text])[0]))],
                 "probabilities": {labels[str(int(c))]: float(p) for c, p in zip(model.classes_, probabilities)},
                 "note": "Dataset classification is not a fact-check. This text-only baseline is separate from the original CLIP experiments."}
-    except (ImportError, FileNotFoundError, ValueError, KeyError):
+    except Exception:
+        logger.exception("Trained model inference failed")
         raise HTTPException(503, "Model artifacts or inference dependencies are incomplete.")
 
 

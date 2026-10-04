@@ -12,7 +12,7 @@ from sklearn.pipeline import Pipeline
 
 
 def read_split(path, text_column, label_column):
-    frame = pd.read_csv(path, sep="\t" if str(path).endswith(".tsv") else ",")
+    frame = pd.read_csv(path, sep="\t" if str(path).endswith(".tsv") else ",", dtype={"id": "string"})
     missing = {text_column, label_column, "id"} - set(frame.columns)
     if missing:
         raise ValueError(f"{path}: missing columns {sorted(missing)}")

@@ -19,7 +19,14 @@ def load_split(folder):
             ids, embeddings = archive["ids"].astype(str), archive["embeddings"]
             if not np.array_equal(ids, frame["id"].astype(str).to_numpy()):
                 raise ValueError(f"{folder}/{modality}: embedding IDs do not match CSV row order")
-            if embeddings.ndim != 2 or len(embeddings) != len(frame) or not np.isfinite(embeddings).all():
+            if (
+                embeddings.ndim != 2
+                or embeddings.shape[1] == 0
+                or len(embeddings) != len(frame)
+                or not np.issubdtype(embeddings.dtype, np.number)
+                or np.iscomplexobj(embeddings)
+                or not np.isfinite(embeddings).all()
+            ):
                 raise ValueError(f"{folder}/{modality}: invalid embedding shape or non-finite values")
             arrays.append(embeddings)
     return frame, np.concatenate(arrays, axis=1)

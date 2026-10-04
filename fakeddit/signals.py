@@ -7,7 +7,7 @@ PHRASES = ("you won't believe", "shocking", "secret", "they don't want you to kn
 def analyze(text: str) -> dict:
     words = re.findall(r"\b[\w'-]+\b", text)
     letters = [c for c in text if c.isalpha()]
-    matches = [phrase for phrase in PHRASES if phrase in text.lower()]
+    matches = [phrase for phrase in PHRASES if re.search(r"\b" + re.escape(phrase) + r"\b", text, re.IGNORECASE)]
     return {
         "mode": "descriptive",
         "verdict": "Not assessed",

@@ -7,14 +7,15 @@ from fastapi.testclient import TestClient
 
 from api import index
 from fakeddit.train_multimodal import load_split
-from fakeddit.train_text import check_disjoint, train
+from fakeddit.train_text import check_disjoint, read_split, train
 
 client = TestClient(index.app)
 
 
 def test_api_validation_and_signal_mode():
     assert client.get('/').status_code == 200
-    assert client.get('/static/app.js').status_code == 200
+    assert client.get('/static/js/app.js').status_code == 200
+    assert client.get('/static/css/workspace.css').status_code == 200
     for text in ('', '   ', 'x' * 10001):
         assert client.post('/api/analyze', json={'text': text}).status_code == 422
     data = client.post('/api/analyze', json={'text': 'SHOCKING discovery!!!'}).json()
@@ -62,3 +63,23 @@ def test_training_artifact_and_prediction(tmp_path, monkeypatch):
     assert response.status_code == 200
     assert sum(response.json()['probabilities'].values()) == pytest.approx(1)
     index.load_model.cache_clear()
+
+
+def test_corrupt_model_returns_service_error(monkeypatch, tmp_path):
+    (tmp_path / 'model.joblib').write_bytes(b'not a valid artifact')
+    (tmp_path / 'metrics.json').write_text('{"labels": {"0": "Class 0", "1": "Class 1"}}')
+    monkeypatch.setattr(index, 'MODEL_DIR', tmp_path)
+    index.load_model.cache_clear()
+    assert client.post('/api/predict', json={'text': 'Some headline'}).status_code == 503
+    index.load_model.cache_clear()
+
+
+def test_preserve_post_ids_with_leading_zeros(tmp_path):
+    path = tmp_path / 'posts.csv'
+    path.write_text('id,clean_title,2_way_label\n001,first post,0\n002,second post,1\n')
+    assert read_split(path, 'clean_title', '2_way_label')['id'].tolist() == ['001', '002']
+
+
+def test_emphasis_matching_does_not_match_inside_words():
+    data = client.post('/api/analyze', json={'text': 'The secretary discussed developments.'}).json()
+    assert data['phrases'] == []

@@ -1,14 +1,15 @@
-# Fakeddit Research Studio
+# FakeEdit — Multimodal Evidence Workspace
 
 A runnable web application and reproducible training tools for the original Fakeddit multimodal fake-news research project. The seven original Colab notebooks and results workbook are preserved.
 
 ## What works now
 
-- Responsive text explorer with descriptive writing indicators, examples, validation, and downloadable JSON reports.
-- Local image preview, dimensions, and a visual-context investigation guide. Images stay in the browser.
+- Responsive dark/light workspace with keyboard-accessible text/image/video tabs, examples, live reports, and JSON export.
+- Drag-and-drop PNG/JPEG/WebP images (10 MB) and MP4/WebM video (50 MB), decoded previews, dimensions, video playback, replacement/removal, and file validation. Media stays in the browser.
+- UTF-8 `.txt` import (1 MB file limit, 10,000-character content limit), request timeouts, cancellation, and recoverable error states.
 - FastAPI health, analysis, prediction, and interactive documentation endpoints.
 - Trainable TF-IDF/logistic regression baseline and ID-aligned image/text XGBoost pipeline.
-- Automated API, training-artifact, split-overlap, and embedding-alignment checks, with GitHub Actions CI.
+- Automated Python and frontend tests, a reproducible browser smoke script, and GitHub Actions CI.
 
 **Model status:** No original dataset, embeddings, or trained classifier was included in the repository. The deployed explorer does not label news as real/fake. Trained text classification activates only after you train and install artifacts. Multimodal inference and automatic image verification are not implemented. The original reported **93.9% accuracy** is historical and has not been independently reproduced; it is not the accuracy of the web app.
 
@@ -78,15 +79,46 @@ For notebook work, install `requirements-local.txt`. The original requirements a
 ```bash
 python -m pip install -r requirements-test.txt
 python -m pytest -q
+npm run check
+npm test
+```
+
+Frontend checks use Node.js 20+ and require no npm dependencies. For an end-to-end browser smoke check, start the app, then run:
+
+```bash
+npx --yes agent-browser --session fakeedit open http://127.0.0.1:8000
+npx --yes agent-browser --session fakeedit eval --stdin < tests/browser/workspace-smoke.js
 ```
 
 The tiny synthetic training fixture tests software behavior only. It is not a benchmark or a shipped model.
 
 ## Deployment
 
+Live app: [FakeEdit workspace](https://fakeddit-multimodal-fakenews.vercel.app). The Vercel project is connected to this repository’s `main` branch.
+
 The project supports Vercel FastAPI deployment using `pyproject.toml` and `vercel.json`. Application dependencies are deliberately separate from PyTorch/CLIP research dependencies. Link this GitHub repository in Vercel for automatic deployments on pushes to `main`. The default deployment serves the explorer with trained prediction unavailable. To host an actual classifier, supply verified model artifacts and matching inference dependencies; larger CLIP models need suitable dedicated compute.
 
 `data/`, `artifacts/`, environments, and secrets are ignored by Git. The app has no database and does not persist submitted text. Hosting providers may retain request metadata in platform logs.
+
+## Project structure
+
+```text
+api/                      FastAPI routes and optional model inference
+fakeddit/                 Training pipelines and text-signal functions
+frontend/
+  index.html              Accessible workspace markup
+  css/workspace.css       Theme tokens and responsive layout
+  js/app.js               UI controller and resource lifecycle
+  js/api.js               Request cancellation, timeouts, schema validation
+  js/media.js             File validation, decoding, metadata, cleanup
+  js/state.js             Central state and report serialization
+tests/                    Python, Node, and browser verification
+notebooks/                Original Colab experiments
+results/                  Historical experiment workbook
+docs/                     Architecture and verification records
+```
+
+See [architecture notes](docs/ARCHITECTURE.md) for the data flow and upload behavior.
 
 ## Project analysis
 
