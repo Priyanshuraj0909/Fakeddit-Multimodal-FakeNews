@@ -1,0 +1,8 @@
+# Local notebook tools and dependencies imported by the research notebooks.
+-r requirements-research.txt
+jupyterlab
+ipykernel
+scipy
+lightgbm
+optuna
+clip-anytorch
