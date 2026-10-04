@@ -1,6 +1,6 @@
 # Architecture
 
-`backend/app/main.py` is the FastAPI entrypoint. It serves frontend/public/index.html and mounts frontend under /static. Request schemas live in schemas; text analysis lives in services; bounded multipart upload handling lives in api. Reserved core/models/utils directories allow future backend additions without mixing them with ML training.
+`backend/app/main.py` is the FastAPI entrypoint. It serves frontend/index.html and mounts frontend under /static. Request schemas live in schemas; text analysis lives in services; bounded multipart upload handling lives in api. Reserved core/models/utils directories allow future backend additions without mixing them with ML training.
 
 `frontend/src/pages/workspace.js` controls the browser interface, importing request logic from services, state/report logic from hooks, and file processing from utils. CSS lives in components; public assets live in frontend/public. The application intentionally retains native ES modules rather than introducing a build framework solely for the directory change.
 

@@ -7,3 +7,7 @@ Vercel: pyproject.toml declares backend.app.main:app and vercel.json targets bac
 GitHub Actions runs Python and native frontend checks. Existing hosting documentation recorded https://fakeddit-multimodal-fakenews.vercel.app as the connected domain; verify its current release after publication using scripts/check_deployment.py. A Git push is not proof of a successful deployment. No deployment settings or access policies are changed by the restructure.
 
 Never commit .env, model weights or datasets. .env.example documents optional paths. Public health means the server is available; inspect /api/capabilities for actual classifier readiness.
+
+## Frontend packaging repair — 2026-10-05
+
+The production restructure exposed FileNotFoundError for frontend/public/index.html and favicon.svg, despite healthy API responses. These files now live directly under frontend, alongside the src directory. The application serves frontend/index.html and /static/favicon.svg. This avoids the deployment's special handling of public directories. Production validation must check homepage, favicon and module assets as well as API health.

@@ -1,5 +1,11 @@
 # Change log
 
+## 2026-10-05 — Fix deployed homepage failure
+
+- Moved HTML and favicon out of frontend/public after deployment logs showed those files missing from the Python runtime.
+- Preserved frontend/src module structure and updated serving paths and documentation.
+- Expanded deployment checks to cover the favicon and linked assets.
+
 ## 2026-10-05 — Fakeddit modular project restructure
 
 - Restored Fakeddit branding and reorganized API under backend/app, browser modules under frontend/src, and model tooling under ml.

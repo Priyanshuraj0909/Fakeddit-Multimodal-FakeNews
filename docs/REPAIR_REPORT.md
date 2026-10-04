@@ -25,7 +25,7 @@
 
 - API/runtime: `backend/app/main.py`, `backend/app/api/uploads.py`, `ml/preprocessing/image_input.py`, `ml/inference/multimodal.py`.
 - ML: `ml/contracts.py`, `clip_encoder.py`, `prepare_pairs.py`, `extract_embeddings.py`, `train_multimodal.py`, `train_text.py`.
-- UI: `frontend/public/index.html`, `frontend/src/services/api.js`, `app.js`, `media.js`, `state.js`.
+- UI: `frontend/index.html`, `frontend/src/services/api.js`, `app.js`, `media.js`, `state.js`.
 - Dependencies: `requirements-app.txt`, `requirements-multimodal.txt`, `pyproject.toml`.
 - Tests: `tests/test_project.py`, `tests/test_multimodal.py`, `tests/frontend/api.test.js`, `tests/browser/workspace-smoke.js`.
 - Guides: README, architecture, audit, backend guide, verification, this report, and TRAINING.md.

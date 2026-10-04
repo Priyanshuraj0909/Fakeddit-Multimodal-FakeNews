@@ -9,7 +9,7 @@ The runnable pipeline supports a TF-IDF/logistic-regression text baseline, local
 ```text
 backend/app/      FastAPI entrypoint, API uploads, request schemas, services
 backend/tests/    Backend regression tests
-frontend/public/  HTML entrypoint and favicon
+frontend/         HTML entrypoint, favicon and package manifest
 frontend/src/     Pages, services, state hooks, utilities, styles, type contracts
 ml/configs/       Pipeline configuration documentation
 ml/datasets/      Local image/post pairing

@@ -118,12 +118,12 @@ def predict(payload: TextInput):
 @app.get("/")
 @app.head("/", include_in_schema=False)
 def home():
-    return FileResponse(ROOT / "frontend/public/index.html")
+    return FileResponse(ROOT / "frontend/index.html")
 
 
 @app.get("/favicon.ico", include_in_schema=False)
 def favicon():
-    return FileResponse(ROOT / "frontend/public/favicon.svg", media_type="image/svg+xml")
+    return FileResponse(ROOT / "frontend/favicon.svg", media_type="image/svg+xml")
 
 
 app.mount("/static", StaticFiles(directory=ROOT / "frontend"), name="static")
