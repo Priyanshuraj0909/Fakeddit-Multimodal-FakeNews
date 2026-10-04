@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { LIMITS, validateFile, readTextFile, formatSize } from '../../frontend/js/media.js';
+import { LIMITS, validateFile, readTextFile, formatSize } from '../../frontend/src/utils/media.js';
 
 const file = (name, type, content) => new File([content], name, { type });
 

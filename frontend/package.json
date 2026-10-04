@@ -1,0 +1,12 @@
+{
+  "name": "fakeddit-frontend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check src/pages/workspace.js && node --check src/services/api.js && node --check src/utils/media.js && node --check src/hooks/state.js",
+    "test": "node --test ../tests/frontend/*.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

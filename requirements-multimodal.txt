@@ -1,0 +1,6 @@
+# Optional local inference/extraction; never installed by the lightweight Vercel app.
+-r requirements-training.txt
+-r requirements-app.txt
+torch>=2.6,<3
+transformers>=4.56,<5
+safetensors>=0.5,<1

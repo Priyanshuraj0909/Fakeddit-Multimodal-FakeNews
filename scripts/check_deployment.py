@@ -11,7 +11,7 @@ def check(base_url):
 
     def request(path, method='GET', payload=None):
         body = None if payload is None else json.dumps(payload).encode()
-        headers = {'User-Agent': 'FakeEdit-Deployment-Check/1.0'}
+        headers = {'User-Agent': 'Fakeddit-Deployment-Check/1.0'}
         if body is not None:
             headers['Content-Type'] = 'application/json'
         with urlopen(Request(base_url + path, data=body, headers=headers, method=method), timeout=15) as response:
@@ -20,14 +20,14 @@ def check(base_url):
             return response.read().decode()
 
     homepage = request('/')
-    if '<title>FakeEdit' not in homepage:
-        raise RuntimeError('Homepage does not contain the FakeEdit application')
+    if '<title>Fakeddit' not in homepage:
+        raise RuntimeError('Homepage does not contain the Fakeddit application')
     request('/', method='HEAD')
     health = json.loads(request('/api/health'))
     request('/api/health', method='HEAD')
     if health.get('status') != 'ok':
         raise RuntimeError('API health check failed')
-    for path in ('/static/css/workspace.css', '/static/js/app.js', '/static/js/api.js', '/static/js/media.js', '/static/js/state.js'):
+    for path in ('/static/src/components/workspace.css', '/static/src/pages/workspace.js', '/static/src/services/api.js', '/static/src/utils/media.js', '/static/src/hooks/state.js'):
         if not request(path).strip():
             raise RuntimeError(f'{path}: empty asset')
     capabilities = json.loads(request('/api/capabilities'))

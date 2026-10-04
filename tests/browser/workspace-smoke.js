@@ -15,6 +15,9 @@
     get(`${kind}-file`).dispatchEvent(new Event('change', { bubbles: true }));
   };
   const results = [];
+  await waitFor(() => get('connection').dataset.status === 'online', 'Capabilities status never became online');
+  assert(Array.from(get('mode').options).map(option => option.value).join(',') === 'analyze,predict,multimodal', 'Analysis modes missing or malformed');
+  results.push('Capabilities status and all analysis modes');
   get('reset').click();
   get('analysis-form').requestSubmit();
   assert(get('form-error').textContent.includes('Add text'), 'Missing-text error not shown');
@@ -38,7 +41,32 @@
   await waitFor(() => !get('image-preview').hidden && get('image-info').textContent.includes('160 × 90'), 'Valid image not previewed');
   assert(get('image-info').textContent.includes('160 × 90'), 'Image dimensions incorrect');
   assert(get('result').hidden, 'Old report survived an evidence change');
+
   results.push('Undecodable image fallback; valid image decoded');
+  // Explicit test-only mode enabling: production remains disabled without a checkpoint.
+  const pairOption = Array.from(get('mode').options).find(option => option.value === 'multimodal');
+  pairOption.disabled = false;
+  get('mode').value = 'multimodal'; get('mode').dispatchEvent(new Event('change'));
+  get('analysis-form').requestSubmit();
+  await waitFor(() => get('form-error').textContent.includes('missing_artifacts'), 'Missing multimodal checkpoint error missing');
+  const realFetch = window.fetch;
+  let pairedRequest = false;
+  try {
+    window.fetch = async (path, options) => {
+      if (path !== '/api/predict/multimodal') return realFetch(path, options);
+      pairedRequest = options.body instanceof FormData && options.body.get('image').name === 'evidence.png' && options.body.get('text').includes('BREAKING');
+      return new Response(JSON.stringify({ mode: 'trained_multimodal', task: 'fakeddit_binary', image_assessed: true, label: 'Mock class 1',
+        scores: { 'Mock class 0': .25, 'Mock class 1': .75 },
+        note: 'MOCKED MODEL response: browser integration only' }));
+    };
+    get('analysis-form').requestSubmit();
+    await waitFor(() => !get('result').hidden, 'Mocked multimodal report missing');
+    assert(pairedRequest && get('report-kind').textContent.includes('TEXT + IMAGE'), 'Paired request integration failed');
+    assert(get('report-media').textContent.includes('Included in text-and-image'), 'Image assessment missing');
+  } finally { window.fetch = realFetch; }
+  get('mode').value = 'analyze'; get('mode').dispatchEvent(new Event('change'));
+  pairOption.disabled = true;
+  results.push('Real missing-checkpoint error and MOCKED text + image request/report integration');
 
   get('tab-video').click();
   upload('video', new File([new Uint8Array(50 * 1024 * 1024 + 1)], 'large.mp4', { type: 'video/mp4' }));

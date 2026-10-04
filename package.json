@@ -1,10 +1,10 @@
 {
-  "name": "fakeedit-workspace",
+  "name": "fakeddit-workspace",
   "private": true,
   "type": "module",
   "scripts": {
     "test": "node --test tests/frontend/*.test.js",
-    "check": "node --check frontend/js/app.js && node --check frontend/js/api.js && node --check frontend/js/media.js && node --check frontend/js/state.js"
+    "check": "node --check frontend/src/pages/workspace.js && node --check frontend/src/services/api.js && node --check frontend/src/utils/media.js && node --check frontend/src/hooks/state.js"
   },
   "engines": { "node": ">=20" }
 }

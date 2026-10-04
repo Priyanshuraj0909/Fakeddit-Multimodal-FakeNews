@@ -1,1 +1,1 @@
-"""FakeEdit backend application and training pipelines."""
+"""Fakeddit backend application and training pipelines."""

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { requestJSON, validateAnalysis } from '../../frontend/js/api.js';
+import { requestJSON, validateAnalysis } from '../../frontend/src/services/api.js';
 
 test('valid JSON with an invalid report schema is rejected before rendering', () => {
   assert.throws(() => validateAnalysis({ mode: 'descriptive', note: 'Missing metrics' }), /incomplete analysis/);
@@ -29,4 +29,20 @@ test('API forwards user cancellation separately from a network error', async t =
   const request = requestJSON('/api/analyze', { signal: controller.signal });
   controller.abort();
   await assert.rejects(request, { name: 'AbortError' });
+});
+
+test('multimodal requests send a real image and text with multipart boundary managed by browser', async t => {
+  let captured;
+  t.mock.method(globalThis, 'fetch', async (_path, options) => {
+    captured = options;
+    return new Response(JSON.stringify({ mode: 'trained_multimodal', task: 'fakeddit_binary', image_assessed: true, label: 'Class 0',
+      scores: { 'Class 0': .6, 'Class 1': .4 }, note: 'Mocked API schema' }));
+  });
+  const image = new File(['fixture'], 'image.png', { type: 'image/png' });
+  const result = validateAnalysis(await requestJSON('/api/predict/multimodal', { text: 'headline', image }));
+  assert.equal(result.mode, 'trained_multimodal');
+  assert.equal(captured.body.get('text'), 'headline');
+  assert.equal(captured.body.get('image').name, 'image.png');
+  assert.equal(captured.headers, undefined);
+  assert.throws(() => validateAnalysis({ ...result, scores: { 'Class 0': .6, 'Class 1': .6 } }), /incomplete/);
 });

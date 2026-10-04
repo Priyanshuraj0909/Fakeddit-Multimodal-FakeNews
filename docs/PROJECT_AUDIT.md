@@ -1,4 +1,4 @@
-# FakeEdit project audit
+# Fakeddit project audit
 
 Reviewed 2026-10-04 against the current repository. This is a code and application audit, not an independent reproduction of model accuracy.
 
@@ -8,7 +8,7 @@ Misleading posts can combine a persuasive headline with a real image used out of
 
 Fakeddit is a research dataset, rather than a live fact-checking service. Its authors provide text, metadata, and images; their benchmark comparisons use samples containing both text and images. Video is an extension of this application's interface, not an implemented Fakeddit video classifier. Dataset documentation: https://github.com/entitize/Fakeddit
 
-The deployed FakeEdit app currently helps a user collect evidence, inspect descriptive writing signals and media metadata, and record what they checked before sharing a claim. A strong real-world workflow is: find the original source, verify dates and locations, compare independent evidence, and review any model suggestion alongside that evidence.
+The deployed Fakeddit app currently helps a user collect evidence, inspect descriptive writing signals and media metadata, and record what they checked before sharing a claim. A strong real-world workflow is: find the original source, verify dates and locations, compare independent evidence, and review any model suggestion alongside that evidence.
 
 Example: a flood photograph paired with today's headline might depict a different year. The workspace can display the photo and let the user record the original publication. It does not automatically discover the photograph's origin or determine whether the caption is true.
 
@@ -34,7 +34,7 @@ Example: a flood photograph paired with today's headline might depict a differen
 4. **Available features were hard to distinguish from research plans.** The interface shows classifier availability, and GET /api/capabilities explicitly states which inference features exist.
 5. **Documentation described old structure/format restrictions.** Architecture, verification, review, and setup records now reflect backend/ and expanded format fallback.
 
-## Missing parts and what they require
+## Original missing parts and their prerequisites
 
 | Missing part | Why it matters | What is required |
 | --- | --- | --- |
@@ -80,7 +80,7 @@ python -m pip install -r requirements-test.txt
 python -m pytest -q
 npm run check
 npm test
-python -m uvicorn backend.main:app --reload --port 8004
+python -m uvicorn backend.app.main:app --reload --port 8004
 ```
 
 Visit http://127.0.0.1:8004 and /docs. Test text analysis, a media-only report, an unpreviewable attachment, context fields, JSON export, reset, and theme switching.
@@ -90,3 +90,10 @@ python scripts/check_deployment.py
 ```
 
 Software tests verify behavior. They do not measure real-world fake-news detection accuracy.
+
+## Subsequent engineering repairs
+
+The text + image API, local CLIP embedding extraction, dataset pairing, checkpoint contracts, content leakage checks, and modality dimension checks are now implemented. They still require genuine compatible artifacts before production inference is available. Read [REPAIR_REPORT.md](REPAIR_REPORT.md) and [TRAINING.md](TRAINING.md) for current behavior and exact setup. The original missing-parts table above records the audit before these repairs.
+
+
+Structure updated 2026-10-05: see README.md and PLAN.md for current module locations and phase status. Dated historical findings above describe their original review context.

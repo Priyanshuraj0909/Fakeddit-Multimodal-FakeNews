@@ -1,4 +1,4 @@
-Sample news article for testing FakeEdit
+Sample news article for testing Fakeddit
 
 A community library announced a weekend workshop on digital literacy. Participants will learn how to compare sources, check publication dates, and distinguish opinions from evidence.
 

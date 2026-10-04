@@ -35,3 +35,8 @@ The repository now contains a FastAPI app, responsive text explorer, browser-onl
 ## Current application audit
 
 See [docs/PROJECT_AUDIT.md](docs/PROJECT_AUDIT.md) for real-world purpose, working features, fixed gaps, missing AI functionality, and completion prerequisites. Runtime code lives in backend/, with browser-local image/video inspection, media-only reports, verification context, and explicit capability/model readiness status.
+
+The paired text + image inference/extraction path has since been added with checkpoint contracts and regression tests. See [docs/REPAIR_REPORT.md](docs/REPAIR_REPORT.md). Production model artifacts remain absent.
+
+
+Structure updated 2026-10-05: see README.md and PLAN.md for current module locations and phase status. Dated historical findings above describe their original review context.

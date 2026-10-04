@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createStore, buildReport, inspectMedia } from '../../frontend/js/state.js';
+import { createStore, buildReport, inspectMedia } from '../../frontend/src/hooks/state.js';
 
 test('updating one attachment preserves the other and exported reports exclude blob URLs', () => {
   const store = createStore();

@@ -5,7 +5,17 @@ __pycache__/
 .env
 .env.*
 !.env.example
-data/
+/data/raw/*
+!/data/raw/.gitkeep
+/data/processed/*
+!/data/processed/.gitkeep
+/data/samples/*
+!/data/samples/.gitkeep
+/models/checkpoints/*
+!/models/checkpoints/.gitkeep
+/models/exported/*
+!/models/exported/.gitkeep
+
 artifacts/
 *.npy
 *.npz
@@ -14,3 +24,4 @@ artifacts/
 .vercel/
 .pytest_cache/
 *.egg-info/
+node_modules/

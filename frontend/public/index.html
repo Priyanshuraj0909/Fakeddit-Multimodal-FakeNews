@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101218">
+  <meta name="description" content="Fakeddit is a multimodal research workspace for text analysis and private image and video inspection.">
+  <title>Fakeddit — Evidence workspace</title>
+  <link rel="icon" href="/static/public/favicon.svg">
+  <link rel="stylesheet" href="/static/src/components/workspace.css">
+  <script type="module" src="/static/src/pages/workspace.js"></script>
+</head>
+<body>
+  <a href="#workspace" class="skip-link">Skip to workspace</a>
+  <aside class="sidebar" aria-label="Sidebar">
+    <a class="brand" href="/" aria-label="Fakeddit home"><span class="brand-mark">F<span>↗</span></span><span>Fakeddit<span class="brand-caption">RESEARCH WORKSPACE</span></span></a>
+    <span class="nav-caption">WORKSPACE</span>
+    <nav aria-label="Main navigation">
+      <a href="#workspace" class="nav-item active"><span aria-hidden="true">◈</span> Evidence studio <span class="nav-pill">01</span></a>
+      <a href="#methodology" class="nav-item"><span aria-hidden="true">▤</span> Methodology</a>
+      <a href="/docs" class="nav-item"><span aria-hidden="true">⌘</span> API reference <span class="nav-arrow">↗</span></a>
+    </nav>
+    <div class="sidebar-note"><span class="note-icon" aria-hidden="true">✧</span><h2>Context changes everything.</h2><p>Bring the headline and its media together. Start with signals, follow with evidence.</p><a href="https://github.com/Priyanshuraj0909/Fakeddit-Multimodal-FakeNews">View source code ↗</a></div>
+    <div class="sidebar-footer"><span class="avatar">PR</span><div>Priyanshu Raj<small>Fakeddit research project</small></div><span class="online-dot" aria-hidden="true"></span></div>
+  </aside>
+  <div class="app-shell">
+    <header class="topbar"><div class="breadcrumbs">Workspace <span>/</span> <strong>Evidence studio</strong></div><div class="topbar-actions"><span class="version-label">STUDIO V2.0</span><button id="theme-toggle" type="button" class="icon-button" aria-label="Switch to light theme" title="Switch theme"><span id="theme-icon" aria-hidden="true">☀</span></button><a class="github-link" href="https://github.com/Priyanshuraj0909/Fakeddit-Multimodal-FakeNews">GitHub <span>↗</span></a></div></header>
+    <main id="workspace">
+      <section class="page-heading"><div><div class="eyebrow"><span class="accent-dot"></span> ONE WORKSPACE. MULTIPLE PERSPECTIVES.</div><h1>Question the claim.<br><span>Explore the evidence.</span></h1><p>A thoughtful workspace for text, images, and video.<br class="desktop-break"> Bring your sources together and look a little closer.</p></div><div class="heading-side"><span id="connection" class="status-badge" role="status"><span class="status-dot"></span><span id="connection-text">Connecting to API</span></span><span class="private-label">◌ &nbsp; Media stays local in explorer mode</span></div></section>
+      <div class="workspace-grid">
+        <section class="input-column" aria-labelledby="input-title">
+          <div class="card composer">
+            <div class="card-header"><div><span class="section-index">01</span><h2 id="input-title">Build your evidence</h2></div><button id="reset" class="text-button" type="button">Reset</button></div>
+            <div class="input-tabs" role="tablist" aria-label="Evidence input type">
+              <button id="tab-text" role="tab" aria-selected="true" aria-controls="panel-text" tabindex="0" type="button"><span aria-hidden="true">T</span> Text <span class="tab-count" id="text-indicator" hidden>1</span></button>
+              <button id="tab-image" role="tab" aria-selected="false" aria-controls="panel-image" tabindex="-1" type="button"><span aria-hidden="true">▧</span> Image <span class="tab-count" id="image-indicator" hidden>1</span></button>
+              <button id="tab-video" role="tab" aria-selected="false" aria-controls="panel-video" tabindex="-1" type="button"><span aria-hidden="true">▷</span> Video <span class="tab-count" id="video-indicator" hidden>1</span></button>
+            </div>
+            <form id="analysis-form">
+              <div id="panel-text" role="tabpanel" aria-labelledby="tab-text">
+                <div class="label-row"><label for="headline">Headline or article</label><button id="sample" type="button" class="text-button accent">Try an example ↗</button></div>
+                <textarea id="headline" maxlength="10000" placeholder="Paste a headline, article, or claim you want to explore…" aria-describedby="text-help count" spellcheck="true"></textarea>
+                <div class="text-meta"><span id="text-help">Your starting point for a closer look</span><span id="count">0 / 10,000</span></div>
+                <label class="text-upload" for="text-file"><span aria-hidden="true">↥</span> Import a .txt file <span>UTF-8 · up to 1 MB</span><input id="text-file" type="file" accept=".txt,text/plain" class="visually-hidden"></label>
+              </div>
+              <div id="panel-image" role="tabpanel" aria-labelledby="tab-image" hidden>
+                <label class="dropzone" id="image-dropzone" for="image-file"><span class="upload-icon" aria-hidden="true">▧</span><strong>Drop an image here</strong><span>or <b>browse files</b></span><small>Images including GIF, AVIF, HEIC, TIFF, SVG and RAW · up to 10 MB</small><input id="image-file" type="file" accept="image/*,.heic,.heif,.tif,.tiff,.raw,.arw,.cr2,.cr3,.nef,.dng,.psd,.jxl" class="visually-hidden"></label>
+                <div id="image-attachment" class="attachment" hidden><div class="media-frame"><p id="image-preview-note">Preview availability depends on your browser and file format.</p><img id="image-preview" alt="Selected evidence image"></div><div class="attachment-meta"><div><strong id="image-name"></strong><span id="image-info"></span></div><button id="remove-image" class="remove-button" type="button" aria-label="Remove image">×</button></div></div>
+                <p class="media-note">Preview and dimensions only. Image authenticity is not assessed.</p>
+              </div>
+              <div id="panel-video" role="tabpanel" aria-labelledby="tab-video" hidden>
+                <label class="dropzone" id="video-dropzone" for="video-file"><span class="upload-icon" aria-hidden="true">▷</span><strong>Drop a video here</strong><span>or <b>browse files</b></span><small>Videos including MP4, WebM, MOV, MKV and AVI · up to 50 MB</small><input id="video-file" type="file" accept="video/*,.mkv,.avi,.mov,.mxf,.ts,.mts,.m2ts,.rm,.rmvb,.ogv" class="visually-hidden"></label>
+                <div id="video-attachment" class="attachment" hidden><div class="media-frame"><p id="video-preview-note">Playback availability depends on your browser and video codec.</p><video id="video-preview" controls playsinline preload="metadata" aria-label="Selected evidence video"></video></div><div class="attachment-meta"><div><strong id="video-name"></strong><span id="video-info"></span></div><button id="remove-video" class="remove-button" type="button" aria-label="Remove video">×</button></div></div>
+                <p class="media-note">Playback and metadata only. Video manipulation is not assessed.</p>
+              </div>
+              <p id="upload-status" class="upload-status" role="status" aria-live="polite"></p>
+              <p id="upload-error" class="error-message" role="alert" hidden></p>
+              <details class="verification-fields"><summary>Source &amp; verification notes (optional)</summary>
+<label for="source-url">Original source URL</label><input id="source-url" type="url" maxlength="2000" placeholder="https://example.com/original-report">
+<label for="publication-date">Publication date</label><input id="publication-date" type="date">
+<label for="verification-notes">Your verification notes</label><textarea id="verification-notes" maxlength="3000" placeholder="What did you check? Which evidence supports or contradicts the claim?"></textarea>
+<p>These details are user supplied, included in exports, and are not automatically verified or saved after reload.</p></details>
+<div class="composer-bottom"><label for="mode">Analysis mode</label><select id="mode" aria-describedby="mode-help"><option value="analyze">Text signals</option><option value="predict" disabled>Trained text model · unavailable</option><option value="multimodal" disabled>Text + image model · unavailable</option></select><p id="mode-help">Observable language patterns. No truth verdict.</p><button id="submit" class="primary-button" type="submit"><span id="submit-label">Analyze text</span><span id="submit-icon" aria-hidden="true">↗</span></button><p id="form-error" class="error-message" role="alert" hidden></p><p class="processing-note">Text is sent to the API for this request. Images are sent only in text + image model mode. Video and verification notes stay local.</p></div>
+            </form>
+          </div>
+          <div class="evidence-strip"><span class="strip-icon" aria-hidden="true">◈</span><div><strong id="evidence-summary">Start with a headline</strong><span id="evidence-detail">Add images or video for context.</span></div><span id="evidence-count">0 sources</span></div>
+        </section>
+        <section class="report-column" aria-labelledby="report-title">
+          <div class="card report-card" id="report-card" aria-busy="false"><div class="card-header"><div><span class="section-index">02</span><h2 id="report-title">Signal report</h2></div><span class="small-label" id="report-status">AWAITING INPUT</span></div>
+            <div id="empty" class="empty-state"><div class="signal-orbit" aria-hidden="true"><span class="orbit-dot one"></span><span class="orbit-dot two"></span><span class="orbit-core">◈</span></div><span class="eyebrow">CLARITY STARTS WITH CONTEXT</span><h3>Every claim deserves<br>a closer look.</h3><p>Add text for language signals, or inspect an image or video.<br>Keep your sources together for context.</p><div class="empty-pills"><span>T &nbsp; Text</span><span>▧ &nbsp; Image</span><span>▷ &nbsp; Video</span></div></div>
+            <div id="loading" class="loading-state" role="status" hidden><span class="spinner"></span><h3>Looking at the language…</h3><p>Gathering observable text signals.</p></div>
+            <div id="result" class="result-content" aria-live="polite" hidden><div class="result-heading"><span class="result-marker" aria-hidden="true">◎</span><div><span id="report-kind" class="eyebrow">TEXT ANALYSIS</span><h3 id="verdict"></h3></div></div><p id="result-note" class="result-note"></p><div id="metrics" class="metric-grid"></div><div class="observations"><h4>Language observations</h4><p id="phrases"></p></div><p id="report-context" class="report-media" hidden></p><div id="report-media" class="report-media" hidden></div><div class="report-bottom"><span id="report-time"></span><button id="download" class="secondary-button" type="button">Export JSON <span aria-hidden="true">↓</span></button></div></div>
+          </div>
+          <div class="card context-card"><div class="context-title"><span aria-hidden="true">✧</span><h2>Before you share</h2><span class="small-label">CONTEXT CHECK</span></div><ol><li><span>01</span><div><strong>Find the original source</strong><p>Trace the claim to its first publication.</p></div></li><li><span>02</span><div><strong>Check the date & location</strong><p>Authentic media can carry a misleading caption.</p></div></li><li><span>03</span><div><strong>Look for independent evidence</strong><p>Compare credible reporting and primary sources.</p></div></li></ol></div>
+        </section>
+      </div>
+      <section id="methodology" class="methodology"><div class="method-heading"><div><span class="eyebrow">THE RESEARCH BEHIND THE WORKSPACE</span><h2>Different inputs. A broader perspective.</h2></div><span class="research-pill">FAKEDDIT BENCHMARK</span></div><div class="research-grid"><article><span class="research-icon" aria-hidden="true">T</span><h3>Text representations</h3><p>RoBERTa embeddings and a reproducible TF-IDF baseline explore the language of a claim.</p><span class="tech-label">ROBERTA / TF-IDF</span></article><article><span class="research-icon" aria-hidden="true">▧</span><h3>Visual features</h3><p>Original ResNet18 and CLIP experiments extract image features for offline multimodal training.</p><span class="tech-label">RESNET18 / CLIP</span></article><article><span class="research-icon" aria-hidden="true">◈</span><h3>Shared context</h3><p>Aligned image and text embeddings feed an XGBoost pipeline with separate validation and test splits.</p><span class="tech-label">FUSION / XGBOOST</span></article></div><p id="capability-status" class="capability-status" role="status">Checking available features…</p><div class="research-disclosure"><span aria-hidden="true">ⓘ</span><p>This workspace offers text signals and local media previews. Trained classification requires compatible model artifacts. Text + image inference is optional; video is playback and metadata only. The original 93.9% accuracy claim has not been independently reproduced.</p></div></section>
+      <footer><span><span class="footer-mark">F↗</span> Fakeddit <span class="footer-divider">/</span> Built to question, designed to explore.</span><a href="https://github.com/entitize/Fakeddit">Original dataset ↗</a></footer>
+    </main>
+  </div>
+</body>
+</html>

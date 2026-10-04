@@ -1,29 +1,9 @@
-# Public Vercel deployment
+# Deployment
 
-Public URL: https://fakeddit-multimodal-fakenews.vercel.app/
+Local: `python -m uvicorn backend.app.main:app --reload`. Container: `docker compose up --build`; serves port 8000 and mounts models read-only. The container installs lightweight app dependencies, so trained inference requires an image extended with the matching training/multimodal dependency group. Docker execution has not been verified locally.
 
-The Vercel project `fakeddit-multimodal-fakenews` builds this repository's `main` branch as a FastAPI application. The entrypoint is `backend.main:app`, configured in `pyproject.toml`.
+Vercel: pyproject.toml declares backend.app.main:app and vercel.json targets backend/app/main.py. Static frontend files are served by FastAPI. Datasets, notebooks, results and tests are excluded from the function bundle. Large CLIP inference should use appropriately provisioned compute; the lightweight web deployment has no bundled model.
 
-## Access configuration
+GitHub Actions runs Python and native frontend checks. Existing hosting documentation recorded https://fakeddit-multimodal-fakenews.vercel.app as the connected domain; verify its current release after publication using scripts/check_deployment.py. A Git push is not proof of a successful deployment. No deployment settings or access policies are changed by the restructure.
 
-Vercel Authentication is set to **Standard Protection** (`prod_deployment_urls_and_all_previews`). The stable production domain above is public; generated deployment URLs and preview URLs retain protection. Password and Trusted IP protection are disabled for this project.
-
-See [Vercel Authentication documentation](https://vercel.com/docs/deployment-protection/methods-to-protect-deployments/vercel-authentication).
-
-This is a Vercel project setting, not an application login or a `vercel.json` option. If the project is recreated, select Standard Protection so the portfolio URL remains public. Successful protected/bypass fetches alone do not establish anonymous visitor access.
-
-## Verify availability
-
-```bash
-python scripts/check_deployment.py
-```
-
-The script uses no login credentials or bypass tokens. It checks the homepage, GET/HEAD availability, static assets, API health, and a sample text-analysis request. GitHub Actions runs it on successful production deployment events and supports manual execution from the Actions tab.
-
-The app supports HEAD requests on `/` and `/api/health` for uptime clients. No model artifacts are needed for the text explorer.
-
-## If the page does not open
-
-Check whether the browser shows a Vercel login, an HTTP error, or a connection timeout. A login usually points to protection settings; a timeout may be a network/DNS problem before the request reaches the app. Check deployment status, domain assignment, and request logs before changing application code.
-
-For a timeout, try a private browser window and another network. For an application error, run the check above and inspect Vercel runtime logs. The local app remains available through `python -m uvicorn backend.main:app --reload`.
+Never commit .env, model weights or datasets. .env.example documents optional paths. Public health means the server is available; inspect /api/capabilities for actual classifier readiness.
