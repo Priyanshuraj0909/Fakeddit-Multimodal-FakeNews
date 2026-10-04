@@ -2,7 +2,7 @@
 
 ## Runtime
 
-FastAPI serves `frontend/index.html`, static assets under `/static`, descriptive analysis, optional text-model inference, and OpenAPI documentation. Vercel discovers `api.index:app` through `pyproject.toml`. App requirements remain separate from research/training requirements; the frontend uses native ES modules and readable CSS without a build-time framework or external font/CDN dependencies.
+FastAPI serves `frontend/index.html`, static assets under `/static`, descriptive analysis, optional text-model inference, and OpenAPI documentation. Vercel discovers `backend.main:app` through `pyproject.toml`. App requirements remain separate from research/training requirements; the frontend uses native ES modules and readable CSS without a build-time framework or external font/CDN dependencies.
 
 ## Frontend boundaries
 
@@ -21,6 +21,6 @@ UTF-8 text import rejects invalid bytes, whitespace-only files, and content beyo
 
 ## Research code
 
-Original Colab notebooks are preserved as historical records and require the original inputs/Drive paths. Runnable local training lives in `fakeddit/`. Post IDs are read as strings to preserve leading zeros. Multimodal embedding checks reject empty/non-numeric/non-finite arrays and require identical ID ordering. New pipelines use independent validation/test splits.
+Original Colab notebooks are preserved as historical records and require the original inputs/Drive paths. Runnable local training lives in `backend/fakeddit/`. Post IDs are read as strings to preserve leading zeros. Multimodal embedding checks reject empty/non-numeric/non-finite arrays and require identical ID ordering. New pipelines use independent validation/test splits.
 
 No trained multimodal or video detector is shipped. Model artifacts remain the prerequisite for text-model prediction. A dataset class and a writing signal do not establish factual truth.

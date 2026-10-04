@@ -11,7 +11,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from fakeddit.signals import analyze
+from backend.fakeddit.signals import analyze
 
 ROOT = Path(__file__).resolve().parents[1]
 MODEL_DIR = Path(os.environ.get("FAKEDDIT_MODEL_DIR", str(ROOT / "artifacts/text-baseline")))

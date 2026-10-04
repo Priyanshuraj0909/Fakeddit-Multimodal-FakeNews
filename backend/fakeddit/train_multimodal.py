@@ -7,7 +7,7 @@ import numpy as np
 from sklearn.metrics import accuracy_score, classification_report
 from xgboost import XGBClassifier
 
-from fakeddit.train_text import check_disjoint, read_split
+from backend.fakeddit.train_text import check_disjoint, read_split
 
 
 def load_split(folder):

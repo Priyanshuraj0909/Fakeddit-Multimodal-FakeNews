@@ -5,9 +5,9 @@ import pandas as pd
 import pytest
 from fastapi.testclient import TestClient
 
-from api import index
-from fakeddit.train_multimodal import load_split
-from fakeddit.train_text import check_disjoint, read_split, train
+from backend import main as index
+from backend.fakeddit.train_multimodal import load_split
+from backend.fakeddit.train_text import check_disjoint, read_split, train
 
 client = TestClient(index.app)
 

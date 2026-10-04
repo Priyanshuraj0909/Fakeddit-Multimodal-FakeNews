@@ -8,7 +8,7 @@ Explore text, image, and video evidence through a responsive interface, a Python
 
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white)](pyproject.toml)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES_Modules-F7DF1E?style=flat-square&logo=javascript&logoColor=black)](frontend/js/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115.12-009688?style=flat-square&logo=fastapi&logoColor=white)](api/index.py)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115.12-009688?style=flat-square&logo=fastapi&logoColor=white)](backend/main.py)
 [![PyTorch](https://img.shields.io/badge/Research-PyTorch-EE4C2C?style=flat-square&logo=pytorch&logoColor=white)](notebooks/)
 [![Vercel](https://img.shields.io/badge/Deployment-Vercel-000000?style=flat-square&logo=vercel&logoColor=white)](https://fakeddit-multimodal-fakenews.vercel.app)
 [![CI](https://github.com/Priyanshuraj0909/Fakeddit-Multimodal-FakeNews/actions/workflows/tests.yml/badge.svg)](https://github.com/Priyanshuraj0909/Fakeddit-Multimodal-FakeNews/actions/workflows/tests.yml)
@@ -112,8 +112,10 @@ curl -X POST http://127.0.0.1:8000/api/analyze \
 ### Directory structure
 
 ```text
-api/                         FastAPI application and optional text inference
-fakeddit/                    Text signals and reproducible training pipelines
+backend/                     Backend server, analysis, and training code
+  main.py                    FastAPI application and optional text inference
+  fakeddit/                  Text signals and reproducible training pipelines
+  README.md                  Backend setup and API guide
 frontend/
   index.html                 Semantic workspace markup
   css/workspace.css          Theme tokens and responsive styling
@@ -194,7 +196,7 @@ The directory must contain `model.joblib` and `metrics.json`. Install inference 
 ### 4. Start the application
 
 ```bash
-python -m uvicorn api.index:app --reload
+python -m uvicorn backend.main:app --reload
 ```
 
 Open **[localhost:8000](http://127.0.0.1:8000)** and **[localhost:8000/docs](http://127.0.0.1:8000/docs)**. In VS Code, select `.venv` as the Python interpreter; the repository includes Python/Jupyter extension recommendations.
@@ -227,7 +229,7 @@ The original datasets, embeddings, and trained models are not bundled. Obtain th
 
 ```bash
 python -m pip install -r requirements-training.txt
-python -m fakeddit.train_text \
+python -m backend.fakeddit.train_text \
   --train data/multimodal_train.tsv \
   --validation data/multimodal_validate.tsv \
   --test data/multimodal_test_public.tsv
@@ -242,7 +244,7 @@ Output: `artifacts/text-baseline/model.joblib` and `metrics.json`. Restart the A
 Each split directory requires `posts.csv` with the same columns, plus `image.npz` and `text.npz`. Each NPZ must contain string `ids` and finite, nonempty, two-dimensional numeric `embeddings`. Embedding IDs must match the CSV row order exactly, and all splits must use the same encoders and preprocessing.
 
 ```bash
-python -m fakeddit.train_multimodal \
+python -m backend.fakeddit.train_multimodal \
   --train data/embeddings/train \
   --validation data/embeddings/validation \
   --test data/embeddings/test
@@ -266,7 +268,7 @@ The stable production URL is public. Preview/generated deployment URLs retain Ve
 python scripts/check_deployment.py
 ```
 
-The [production app](https://fakeddit-multimodal-fakenews.vercel.app) is hosted on Vercel and connected to this repository's `main` branch. `pyproject.toml` declares `api.index:app`; `vercel.json` configures FastAPI deployment and excludes datasets, tests, historical results, and notebooks from the function bundle. GitHub Actions checks Python and frontend code on every push and pull request; Vercel automatically redeploys changes to `main`.
+The [production app](https://fakeddit-multimodal-fakenews.vercel.app) is hosted on Vercel and connected to this repository's `main` branch. `pyproject.toml` declares `backend.main:app`; `vercel.json` configures FastAPI deployment and excludes datasets, tests, historical results, and notebooks from the function bundle. GitHub Actions checks Python and frontend code on every push and pull request; Vercel automatically redeploys changes to `main`.
 
 | Decision | Why it matters |
 | --- | --- |

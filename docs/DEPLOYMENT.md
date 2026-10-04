@@ -2,7 +2,7 @@
 
 Public URL: https://fakeddit-multimodal-fakenews.vercel.app/
 
-The Vercel project `fakeddit-multimodal-fakenews` builds this repository's `main` branch as a FastAPI application. The entrypoint is `api.index:app`, configured in `pyproject.toml`.
+The Vercel project `fakeddit-multimodal-fakenews` builds this repository's `main` branch as a FastAPI application. The entrypoint is `backend.main:app`, configured in `pyproject.toml`.
 
 ## Access configuration
 
@@ -26,4 +26,4 @@ The app supports HEAD requests on `/` and `/api/health` for uptime clients. No m
 
 Check whether the browser shows a Vercel login, an HTTP error, or a connection timeout. A login usually points to protection settings; a timeout may be a network/DNS problem before the request reaches the app. Check deployment status, domain assignment, and request logs before changing application code.
 
-For a timeout, try a private browser window and another network. For an application error, run the check above and inspect Vercel runtime logs. The local app remains available through `python -m uvicorn api.index:app --reload`.
+For a timeout, try a private browser window and another network. For an application error, run the check above and inspect Vercel runtime logs. The local app remains available through `python -m uvicorn backend.main:app --reload`.
