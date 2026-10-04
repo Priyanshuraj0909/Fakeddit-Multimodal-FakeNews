@@ -13,7 +13,7 @@ Explore text, image, and video evidence through a responsive interface, a Python
 [![Vercel](https://img.shields.io/badge/Deployment-Vercel-000000?style=flat-square&logo=vercel&logoColor=white)](https://fakeddit-multimodal-fakenews.vercel.app)
 [![CI](https://github.com/Priyanshuraj0909/Fakeddit-Multimodal-FakeNews/actions/workflows/tests.yml/badge.svg)](https://github.com/Priyanshuraj0909/Fakeddit-Multimodal-FakeNews/actions/workflows/tests.yml)
 
-**[Live Demo](https://fakeddit-multimodal-fakenews.vercel.app)** · **[API Documentation](https://fakeddit-multimodal-fakenews.vercel.app/docs)** · **[Architecture](docs/ARCHITECTURE.md)** · **[Verification](docs/VERIFICATION.md)**
+**[Live Demo](https://fakeddit-multimodal-fakenews.vercel.app)** · **[API Documentation](https://fakeddit-multimodal-fakenews.vercel.app/docs)** · **[Project Audit & Missing Features](docs/PROJECT_AUDIT.md)** · **[Architecture](docs/ARCHITECTURE.md)** · **[Verification](docs/VERIFICATION.md)**
 
 </div>
 
@@ -45,6 +45,9 @@ The deployed app runs without model artifacts and returns **descriptive signals,
 - **Drag-and-drop media previews:** attach common images, HEIC/TIFF/RAW images, and MP4/WebM/MOV/MKV/AVI videos, with limits of 10 MB per image and 50 MB per video. Browser-decodable media is previewed; other recognized formats remain attached with an explicit preview-unavailable notice. Media bytes stay on the device.
 - **Professional responsive interface:** dark/light themes, reusable CSS tokens, minimalist cards, smooth transitions, visible focus states, and reduced-motion support.
 - **Reliable asynchronous interactions:** request timeouts, cancellation on evidence changes, stale-response suppression, response-schema validation, and recoverable errors.
+- **Media-only reports:** inspect attachments without entering text; reports contain file metadata and preview status, without a truth verdict.
+- **Verification context:** add an original source URL, publication date, and your notes; these user-supplied details are included in JSON exports.
+- **Explicit capability status:** distinguish working language analysis from missing trained inference; model readiness checks reject corrupt artifacts.
 - **Managed preview resources:** reject non-media, empty, and oversized files; retain metadata for unpreviewable attachments and release object URLs when previews fail, change, or are removed.
 - **Portable evidence reports:** export JSON containing analysis results, a timestamp, and preview-only attachment metadata; exclude blob URLs and raw media files.
 - **Reproducible ML workflows:** train-only TF-IDF fitting, validation-based model selection/early stopping, separate test evaluation, saved metrics, and post-ID alignment checks.
@@ -98,7 +101,8 @@ flowchart TD
 
 | Method | Endpoint | Purpose |
 | --- | --- | --- |
-| `GET` | `/api/health` | Service version and model availability |
+| `GET` | `/api/health` | Service version and validated model availability |
+| `GET` | `/api/capabilities` | Available modes, limits, and missing inference capabilities |
 | `POST` | `/api/analyze` | Descriptive analysis of a `text` payload |
 | `POST` | `/api/predict` | Text-model classification; returns `503` if artifacts/dependencies are unavailable |
 | `GET` | `/docs` | Interactive OpenAPI documentation |
@@ -210,7 +214,7 @@ npm run check
 npm test
 ```
 
-The current verification record contains **9 Python tests and 8 frontend tests**. They cover request validation, corrupt/missing model artifacts, training outputs, post-ID preservation, embedding alignment, upload limits, UTF-8 decoding, timeouts, and cancellation.
+The current verification record contains **10 Python tests and 9 frontend tests**. They cover request validation, corrupt/missing model artifacts, training outputs, post-ID preservation, embedding alignment, upload limits, UTF-8 decoding, timeouts, and cancellation.
 
 With the server running, verify the user flow in Chromium:
 

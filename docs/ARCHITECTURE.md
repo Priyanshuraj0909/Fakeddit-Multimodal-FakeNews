@@ -11,11 +11,11 @@ FastAPI serves `frontend/index.html`, static assets under `/static`, descriptive
 - `api.js` bounds request time, forwards cancellation, and validates report schemas before rendering.
 - `media.js` validates file MIME/extension/size and decodes media in detached elements. Failed, replaced, removed, or cancelled previews release object URLs. File content is not uploaded to the server.
 
-Text input is sent to `/api/analyze` or `/api/predict`. Edits, attachment changes, and reset clear the report and abort its request, preventing stale responses from representing newer evidence. Reports include local attachment metadata with an explicit preview-only assessment; blob URLs and raw media bytes are excluded.
+Text input is sent to `/api/analyze` or `/api/predict`. Edits, attachment changes, and reset clear the report and abort its request, preventing stale responses from representing newer evidence. Media-only submissions produce local inspection reports without an API request. Optional source URL, publication date, and notes are local user-supplied context included in reports; editing them invalidates any old report. Reports include local attachment metadata with an explicit preview-only assessment; blob URLs and raw media bytes are excluded.
 
 ## Input handling
 
-One image and one video can coexist with text. Drag/drop and native file pickers share validation. Dropping a file elsewhere does not navigate away. Invalid replacement files preserve an already valid preview. Browser-supported MP4/WebM codecs are required; a decode failure is reported without leaving the submit button locked. Some WebM files lack a finite duration; they remain previewable with an explicit unavailable-duration label.
+One image and one video can coexist with text. Drag/drop and native file pickers share validation. Dropping a file elsewhere does not navigate away. Invalid replacement files preserve an already valid preview. Many image/video extensions are accepted. Decodable media receives a preview; unavailable codecs, damaged media, and decode timeouts produce attachment metadata with an explicit preview-unavailable note. Some WebM files lack a finite duration; they remain previewable with an explicit unavailable-duration label.
 
 UTF-8 text import rejects invalid bytes, whitespace-only files, and content beyond 10,000 characters. Theme storage is optional: blocked localStorage does not prevent the toggle from working. Tabs support arrow keys, Home, and End; upload controls remain keyboard accessible. Reduced-motion preferences suppress animations.
 
@@ -24,3 +24,7 @@ UTF-8 text import rejects invalid bytes, whitespace-only files, and content beyo
 Original Colab notebooks are preserved as historical records and require the original inputs/Drive paths. Runnable local training lives in `backend/fakeddit/`. Post IDs are read as strings to preserve leading zeros. Multimodal embedding checks reject empty/non-numeric/non-finite arrays and require identical ID ordering. New pipelines use independent validation/test splits.
 
 No trained multimodal or video detector is shipped. Model artifacts remain the prerequisite for text-model prediction. A dataset class and a writing signal do not establish factual truth.
+
+## Capability and model readiness
+
+GET /api/capabilities reports available analysis modes, classifier status, limits, and absent image/video/fact-verification features. Health checks distinguish missing artifacts/dependencies and invalid artifacts. Trusted model loading validates label mapping and a probability probe; successfully loaded models are cached until process restart. Source context and media bytes are not sent to the API.

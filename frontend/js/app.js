@@ -1,6 +1,6 @@
 import { requestJSON, validateAnalysis } from './api.js';
 import { prepareMedia, readTextFile, formatSize, MEDIA_EXTENSIONS } from './media.js';
-import { createStore, buildReport } from './state.js';
+import { createStore, buildReport, inspectMedia } from './state.js';
 
 const byId = id => document.getElementById(id);
 const store = createStore();
@@ -36,9 +36,12 @@ function setText(text) {
 function renderReport(report) {
   byId('metrics').replaceChildren();
   if (!report) return;
-  byId('verdict').textContent = report.mode === 'descriptive' ? 'Signals worth exploring.' : report.label;
+  byId('verdict').textContent = report.mode === 'media_inspection' ? 'Media inspection complete.' : report.mode === 'descriptive' ? 'Signals worth exploring.' : report.label;
+  byId('report-kind').textContent = report.mode === 'media_inspection' ? 'LOCAL MEDIA INSPECTION' : 'TEXT ANALYSIS';
   byId('result-note').textContent = report.note;
-  const metrics = report.mode === 'descriptive'
+  const metrics = report.mode === 'media_inspection'
+    ? [['Attachments', report.attachment_count], ['Previews available', report.preview_count], ['Combined size', formatSize(report.total_bytes)]]
+    : report.mode === 'descriptive'
     ? [['Words', report.word_count], ['Characters', report.character_count], ['Uppercase letters', `${Math.round(report.uppercase_ratio * 100)}%`], ['Exclamation marks', report.exclamation_count]]
     : Object.entries(report.probabilities).map(([label, value]) => [label, `${(value * 100).toFixed(1)}%`]);
   for (const [label, value] of metrics) {
@@ -47,9 +50,13 @@ function renderReport(report) {
     const span = document.createElement('span'); span.textContent = label;
     metric.append(strong, span); byId('metrics').append(metric);
   }
-  byId('phrases').textContent = report.mode === 'descriptive'
+  byId('phrases').textContent = report.mode === 'media_inspection'
+    ? 'Check the original publication, caption, date, and location. No image or video detector was run.'
+    : report.mode === 'descriptive'
     ? (report.phrases.length ? `Emphasis phrases: ${report.phrases.join(', ')}. These can appear in accurate and inaccurate reporting.` : 'No phrases from the small emphasis list were found. This does not establish credibility.')
     : 'Probabilities describe the fitted dataset classes; they are not calibrated truth probabilities.';
+  byId('report-context').textContent = [report.context.source_url && `Source supplied: ${report.context.source_url}`, report.context.publication_date && `Publication date supplied: ${report.context.publication_date}`, report.context.verification_notes && `Your verification notes: ${report.context.verification_notes}`].filter(Boolean).join(' · ');
+  byId('report-context').hidden = !byId('report-context').textContent;
   const attachments = Object.entries(report.attachments);
   byId('report-media').hidden = !attachments.length;
   byId('report-media').textContent = attachments.map(([kind, media]) => `${kind === 'image' ? 'Image' : 'Video'} attached: ${media.name}. Preview only; not assessed.`).join(' ');
@@ -96,11 +103,11 @@ store.subscribe(state => {
     }
   }
   byId('evidence-summary').textContent = sourceCount ? `${sourceCount} evidence ${sourceCount === 1 ? 'input' : 'inputs'} in this workspace` : 'Start with a headline';
-  byId('evidence-detail').textContent = sourceCount ? (hasText ? 'Text analysis with media alongside for context.' : 'Add text to run language analysis.') : 'Add images or video for context.';
+  byId('evidence-detail').textContent = sourceCount ? (hasText ? 'Text analysis with media alongside for context.' : 'Create a local media report or add text for language analysis.') : 'Add images or video for context.';
   byId('evidence-count').textContent = `${sourceCount} ${sourceCount === 1 ? 'source' : 'sources'}`;
   const loading = state.status === 'loading';
   byId('submit').disabled = loading || uploads.size > 0;
-  byId('submit-label').textContent = loading ? 'Analyzing…' : 'Analyze text';
+  byId('submit-label').textContent = loading ? 'Analyzing…' : hasText ? 'Analyze text' : sourceCount ? 'Inspect media' : 'Analyze text';
   byId('report-card').setAttribute('aria-busy', String(loading));
   byId('empty').hidden = loading || Boolean(state.report);
   byId('loading').hidden = !loading;
@@ -111,6 +118,13 @@ store.subscribe(state => {
   byId('upload-status').textContent = state.uploadStatus;
   if (renderedReport !== state.report) { renderReport(state.report); renderedReport = state.report; }
 });
+
+for (const [id, field] of [['source-url', 'source_url'], ['publication-date', 'publication_date'], ['verification-notes', 'verification_notes']]) {
+  byId(id).addEventListener('input', () => {
+    invalidateReport();
+    store.update({ context: { [field]: byId(id).value } });
+  });
+}
 
 for (const kind of kinds) {
   byId(`tab-${kind}`).addEventListener('click', () => store.update({ tab: kind }));
@@ -215,7 +229,8 @@ byId('reset').addEventListener('click', () => {
   setText('');
   byId('mode').value = 'analyze';
   byId('mode-help').textContent = 'Observable language patterns. No truth verdict.';
-  store.update({ tab: 'text', mode: 'analyze', uploadError: '', uploadStatus: '' });
+  for (const id of ['source-url', 'publication-date', 'verification-notes']) byId(id).value = '';
+  store.update({ tab: 'text', mode: 'analyze', context: { source_url: '', publication_date: '', verification_notes: '' }, uploadError: '', uploadStatus: '' });
   byId('headline').focus();
 });
 
@@ -224,8 +239,13 @@ byId('analysis-form').addEventListener('submit', async event => {
   if (store.get().status === 'loading' || uploads.size) return;
   const state = store.get();
   if (!state.text.trim()) {
-    store.update({ error: 'Add a headline or article to analyze. Image and video previews do not run classification.', tab: 'text' });
-    byId('headline').focus(); return;
+    try {
+      store.update({ status: 'ready', error: '', report: buildReport(inspectMedia(state), state) });
+    } catch (error) {
+      store.update({ error: error.message, tab: 'text' });
+      byId('headline').focus();
+    }
+    return;
   }
   analysisController?.abort();
   const controller = new AbortController(); analysisController = controller;
@@ -266,12 +286,14 @@ requestJSON('/api/health', { timeout: 10000 }).then(health => {
   if (health.status !== 'ok' || typeof health.model_available !== 'boolean') throw new Error('Invalid health response');
   byId('connection').dataset.status = 'online';
   byId('connection-text').textContent = health.model_available ? 'Text model connected' : 'Text explorer online';
+  byId('capability-status').textContent = `Text signals: available · Text classifier: ${health.model_available ? 'ready' : (health.model_status || 'unavailable').replaceAll('_', ' ')} · Image/video AI: unavailable`;
   if (health.model_available) {
     const option = byId('mode').options[1]; option.disabled = false; option.textContent = 'Trained text classifier';
   }
 }).catch(() => {
   byId('connection').dataset.status = 'offline';
   byId('connection-text').textContent = 'API unavailable · retry analysis';
+  byId('capability-status').textContent = 'Text API unavailable. Local media inspection remains available.';
 });
 
 window.addEventListener('pagehide', () => {

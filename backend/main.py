@@ -33,12 +33,31 @@ def clean_text(value: str) -> str:
 @app.get("/api/health")
 @app.head("/api/health", include_in_schema=False)
 def health():
-    model_available = (
-        (MODEL_DIR / "model.joblib").is_file()
-        and (MODEL_DIR / "metrics.json").is_file()
-        and all(find_spec(name) is not None for name in ("joblib", "sklearn", "numpy", "scipy"))
-    )
-    return {"status": "ok", "model_available": model_available, "version": "2.0.0"}
+    dependencies = all(find_spec(name) is not None for name in ("joblib", "sklearn", "numpy", "scipy"))
+    artifacts = all((MODEL_DIR / name).is_file() for name in ("model.joblib", "metrics.json"))
+    reason = "missing_artifacts" if not artifacts else "missing_dependencies" if not dependencies else "ready"
+    if reason == "ready":
+        try:
+            load_model(str(MODEL_DIR))
+        except Exception:
+            reason = "invalid_artifacts"
+    return {"status": "ok", "model_available": reason == "ready", "model_status": reason, "version": "2.0.0"}
+
+
+@app.get("/api/capabilities")
+def capabilities():
+    model = health()
+    return {
+        "text_analysis": True,
+        "text_classifier": {"available": model["model_available"], "status": model["model_status"]},
+        "media_inspection": "browser_local",
+        "image_inference": False,
+        "video_inference": False,
+        "fact_verification": False,
+        "limits": {"text_characters": 10000, "image_bytes": 10 * 1024 * 1024, "video_bytes": 50 * 1024 * 1024},
+        "note": "Reports describe language and supplied media metadata. They do not establish factual truth.",
+    }
+
 
 
 @app.post("/api/analyze")
@@ -54,7 +73,19 @@ def load_model(directory: str):
     metadata = json.loads((path / "metrics.json").read_text())
     if not isinstance(metadata.get("labels"), dict):
         raise ValueError("Missing model label mapping")
-    return joblib.load(path / "model.joblib"), metadata
+    model = joblib.load(path / "model.joblib")
+    classes = getattr(model, "classes_", [])
+    if len(classes) < 2 or any(str(int(c)) not in metadata["labels"] for c in classes):
+        raise ValueError("Model classes do not match the label mapping")
+    if any(not isinstance(metadata["labels"][str(int(c))], str) for c in classes):
+        raise ValueError("Invalid model labels")
+    import numpy as np
+    probabilities = np.asarray(model.predict_proba(["Model readiness check"]), dtype=float)
+    if (probabilities.shape != (1, len(classes)) or not np.isfinite(probabilities).all()
+            or (probabilities < 0).any() or (probabilities > 1).any()
+            or not np.isclose(probabilities.sum(), 1)):
+        raise ValueError("Invalid model probabilities")
+    return model, metadata
 
 
 @app.post("/api/predict")

@@ -30,10 +30,13 @@ def check(base_url):
     for path in ('/static/css/workspace.css', '/static/js/app.js', '/static/js/api.js', '/static/js/media.js', '/static/js/state.js'):
         if not request(path).strip():
             raise RuntimeError(f'{path}: empty asset')
+    capabilities = json.loads(request('/api/capabilities'))
+    if capabilities.get('text_analysis') is not True or capabilities.get('media_inspection') != 'browser_local':
+        raise RuntimeError('Capabilities endpoint did not return supported modes')
     report = json.loads(request('/api/analyze', method='POST', payload={'text': 'A sample headline for deployment verification.'}))
     if report.get('mode') != 'descriptive' or report.get('word_count', 0) < 1:
         raise RuntimeError('Analysis endpoint did not return a valid report')
-    return {'url': base_url, 'status': 'passed', 'version': health.get('version'), 'checks': ['public homepage', 'GET/HEAD availability', 'frontend assets', 'API health', 'text analysis']}
+    return {'url': base_url, 'status': 'passed', 'version': health.get('version'), 'checks': ['public homepage', 'GET/HEAD availability', 'frontend assets', 'API health', 'capabilities', 'text analysis']}
 
 
 if __name__ == '__main__':

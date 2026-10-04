@@ -17,7 +17,7 @@
   const results = [];
   get('reset').click();
   get('analysis-form').requestSubmit();
-  assert(get('form-error').textContent.includes('Add a headline'), 'Missing-text error not shown');
+  assert(get('form-error').textContent.includes('Add text'), 'Missing-text error not shown');
   get('sample').click(); get('analysis-form').requestSubmit();
   await waitFor(() => !get('result').hidden, 'Text report did not render');
   assert(get('metrics').children.length === 4, 'Text metrics missing');
@@ -69,6 +69,17 @@
   assert(get('report-media').textContent.includes('Image attached') && get('report-media').textContent.includes('Video attached'), 'Report metadata missing');
   assert(get('evidence-count').textContent === '3 sources', 'Evidence count incorrect');
   results.push('WebM preview and combined report metadata');
+  get('headline').value = ''; get('headline').dispatchEvent(new Event('input'));
+  get('source-url').value = 'https://example.com/source';
+  get('source-url').dispatchEvent(new Event('input'));
+  get('verification-notes').value = 'Caption not yet verified';
+  get('verification-notes').dispatchEvent(new Event('input'));
+  get('analysis-form').requestSubmit();
+  await waitFor(() => !get('result').hidden, 'Media-only report missing');
+  assert(get('verdict').textContent.includes('Media inspection'), 'Media-only report claims text analysis');
+  assert(get('report-context').textContent.includes('Caption not yet verified'), 'Verification context missing');
+  assert(get('report-kind').textContent === 'LOCAL MEDIA INSPECTION', 'Wrong report kind');
+  results.push('Media-only report and user-supplied verification context');
 
   get('remove-video').click();
   assert(get('video-attachment').hidden && !get('video-preview').hasAttribute('src'), 'Video resource not cleared');

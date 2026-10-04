@@ -2,8 +2,8 @@
 
 ## Automated checks
 
-- Python 3.12: `python -m pytest -q` — 9 tests passed, with one upstream Starlette/AnyIO deprecation warning.
-- Node.js: `npm test` — 8 tests passed.
+- Python 3.12: `python -m pytest -q` — 10 tests passed, with one upstream Starlette/AnyIO deprecation warning.
+- Node.js: `npm test` — 9 tests passed.
 - `npm run check`, Python module compilation, and Git whitespace checks passed.
 - Backend tests cover homepage/static assets, input validation, missing/corrupt models, trained-artifact inference, post-ID preservation, split overlap, embedding alignment, and phrase boundaries.
 - Frontend tests cover file formats/limits, empty files, UTF-8 decoding, report metadata, incomplete API schemas, timeouts, and cancellation.
@@ -30,3 +30,7 @@ Real Fakeddit training and the historical 93.9% claim have not been reproduced b
 ## Public-access repair
 
 The Vercel project now uses Standard Protection: the stable production domain is public, while preview/generated deployment URLs remain protected. A fresh browser opened the production app without authentication and passed the multimodal smoke flow. GET/HEAD availability support and an unauthenticated deployment-check script were added; see DEPLOYMENT.md.
+
+## Current audit updates
+
+Added capability status, corrupt-model readiness validation, media-only local reports, and user-supplied source/date/notes in exports. Tests cover capability honesty and local report metadata. See PROJECT_AUDIT.md for missing AI features; these updates do not add a trained classifier.

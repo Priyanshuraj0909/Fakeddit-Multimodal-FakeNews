@@ -2,11 +2,11 @@
 
 Reviewed from the cloned source on 2026-10-04. This is a static review; training and reported accuracy were not reproduced.
 
-## Current structure
+## Original structure (before application updates)
 
-Seven Colab notebooks implement ResNet image extraction, RoBERTa text extraction, tabular/image/text classifiers, deep fusion, CLIP feature extraction, fusion comparisons, and CLIP/XGBoost experiments. `results/multimodal_results-5.xlsx` contains saved experimental results. There is no standalone training pipeline or inference application.
+Seven Colab notebooks implement ResNet image extraction, RoBERTa text extraction, tabular/image/text classifiers, deep fusion, CLIP feature extraction, fusion comparisons, and CLIP/XGBoost experiments. `results/multimodal_results-5.xlsx` contains saved experimental results. At the time of the original clone there was no standalone training pipeline or inference application. These have since been added; see the current audit below.
 
-## Findings
+## Historical notebook findings
 
 1. **Local execution is blocked by external data and Colab paths.** Notebooks read TSV/CSV datasets and NPY embeddings from several Google Drive directories. None of these inputs or saved models is tracked here. Drive mounts and notebook shell commands also need local equivalents.
 2. **Test data influences model selection.** In notebook 07, cells 41 and 42 use `eval_set=[(X_test, y_test)]` with early stopping and then report metrics on the same test set. This compromises an independent final evaluation. Split validation data from training, select models on validation, and evaluate the test set once after selection.
@@ -31,3 +31,7 @@ Corrected the clone URL and folder in the README, added local VS Code guidance a
 ## Implemented updates
 
 The repository now contains a FastAPI app, responsive text explorer, browser-only image preview, JSON reports, optional trained-text inference, separate application/research requirements, reproducible text training, and CPU XGBoost training from ID-aligned embeddings. New training tools use separate validation and test inputs and reject cross-split post overlap. CI covers the new code. Historical notebooks remain unchanged; their issues are documented rather than silently altering recorded experiments. See README.md for commands and docs/VERIFICATION.md for checks.
+
+## Current application audit
+
+See [docs/PROJECT_AUDIT.md](docs/PROJECT_AUDIT.md) for real-world purpose, working features, fixed gaps, missing AI functionality, and completion prerequisites. Runtime code lives in backend/, with browser-local image/video inspection, media-only reports, verification context, and explicit capability/model readiness status.

@@ -77,6 +77,8 @@ def test_corrupt_model_returns_service_error(monkeypatch, tmp_path):
     (tmp_path / 'metrics.json').write_text('{"labels": {"0": "Class 0", "1": "Class 1"}}')
     monkeypatch.setattr(index, 'MODEL_DIR', tmp_path)
     index.load_model.cache_clear()
+    assert client.get('/api/health').json()['model_status'] == 'invalid_artifacts'
+    assert client.get('/api/capabilities').json()['text_classifier']['available'] is False
     assert client.post('/api/predict', json={'text': 'Some headline'}).status_code == 503
     index.load_model.cache_clear()
 
@@ -90,3 +92,15 @@ def test_preserve_post_ids_with_leading_zeros(tmp_path):
 def test_emphasis_matching_does_not_match_inside_words():
     data = client.post('/api/analyze', json={'text': 'The secretary discussed developments.'}).json()
     assert data['phrases'] == []
+
+
+def test_capabilities_do_not_claim_missing_inference(monkeypatch, tmp_path):
+    monkeypatch.setattr(index, 'MODEL_DIR', tmp_path)
+    data = client.get('/api/capabilities').json()
+    assert data['text_analysis'] is True
+    assert data['media_inspection'] == 'browser_local'
+    assert data['text_classifier'] == {'available': False, 'status': 'missing_artifacts'}
+    assert data['image_inference'] is False
+    assert data['video_inference'] is False
+    assert data['fact_verification'] is False
+    assert data['limits']['image_bytes'] == 10 * 1024 * 1024

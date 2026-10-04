@@ -24,7 +24,8 @@ Open http://127.0.0.1:8000 for the app and http://127.0.0.1:8000/docs for intera
 
 ## API endpoints
 
-- `GET /api/health`: service health and model availability.
+- `GET /api/health`: service health and validated model readiness.
+- `GET /api/capabilities`: supported modes, limits, and unavailable inference features.
 - `POST /api/analyze`: descriptive analysis of a JSON body such as `{"text": "Your headline"}`.
 - `POST /api/predict`: optional trained text classifier; returns 503 until model artifacts and inference dependencies are installed.
 
