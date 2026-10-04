@@ -1,19 +1,20 @@
 /** Validate files before allocating preview resources. */
 export const LIMITS = Object.freeze({ image: 10 * 1024 * 1024, video: 50 * 1024 * 1024, text: 1024 * 1024 });
-const TYPES = {
-  image: { 'image/png': ['png'], 'image/jpeg': ['jpg', 'jpeg'], 'image/webp': ['webp'] },
-  video: { 'video/mp4': ['mp4'], 'video/webm': ['webm'] },
-  text: { 'text/plain': ['txt'], '': ['txt'] },
-};
+export const MEDIA_EXTENSIONS = Object.freeze({
+  image: 'png jpg jpeg jpe jfif webp gif apng avif bmp dib svg ico cur tif tiff heic heif hif jxl jp2 j2k jpf jpx jpm mj2 psd psb raw arw cr2 cr3 nef nrw orf raf rw2 dng pef srw xcf tga pcx ppm pgm pbm pnm'.split(' '),
+  video: 'mp4 webm mov qt m4v mkv avi wmv asf flv f4v mpg mpeg mpe m1v m2v mpv ogv ogg 3gp 3g2 ts mts m2ts vob divx rm rmvb mxf'.split(' '),
+});
 
 export function validateFile(file, kind) {
-  if (!file || !TYPES[kind]) throw new Error('Choose a supported file.');
-  const extensions = TYPES[kind][file.type];
+  if (!file || !LIMITS[kind]) throw new Error('Choose a supported file.');
   const extension = file.name.split('.').pop().toLowerCase();
-  if (!extensions?.includes(extension)) {
-    const formats = { image: 'PNG, JPEG, or WebP', video: 'MP4 or WebM', text: 'a UTF-8 .txt' };
-    throw new Error(`Choose ${formats[kind]} file.`);
-  }
+  const type = (file.type || '').toLowerCase().split(';')[0].trim();
+  const generic = !type || type === 'application/octet-stream';
+  const allowed = kind === 'text'
+    ? extension === 'txt' && (generic || type === 'text/plain')
+    : MEDIA_EXTENSIONS[kind].includes(extension) && (generic || type.startsWith(kind + '/') ||
+      (kind === 'video' && ['application/ogg', 'application/mxf', 'application/vnd.rn-realmedia', 'application/x-matroska'].includes(type)));
+  if (!allowed) throw new Error(kind === 'text' ? 'Choose a UTF-8 .txt file.' : 'Choose an image or video file with a recognized media extension and matching file type.');
   if (file.size === 0) throw new Error('This file is empty. Choose another file.');
   if (file.size > LIMITS[kind]) throw new Error(`File is too large. The ${kind} limit is ${LIMITS[kind] / 1024 / 1024} MB.`);
   return file;
@@ -33,7 +34,7 @@ export function formatSize(bytes) {
   return bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
 }
 
-/** Resolve only decoded media; release URLs on failures, replacement, and cancellation. */
+/** Keep accepted attachments even when their codec cannot be previewed; release all URLs. */
 export function prepareMedia(file, kind, signal) {
   validateFile(file, kind);
   return new Promise((resolve, reject) => {
@@ -56,7 +57,14 @@ export function prepareMedia(file, kind, signal) {
       if (finished) return;
       finished = true; clear(); release(); reject(error);
     };
-    const failure = () => fail(new Error(kind === 'image' ? 'This file could not be decoded as an image.' : 'This video cannot be played in your browser. Try an H.264 MP4 or a WebM file.'));
+    const unavailable = reason => {
+      if (finished) return;
+      finished = true; clear(); release();
+      resolve({ url: null, metadata: { name: file.name, type: file.type, size: file.size,
+        width: null, height: null, preview_available: false, preview_note: reason,
+        ...(kind === 'video' ? { duration_seconds: null } : {}) }, dispose: release });
+    };
+    const failure = () => unavailable('Attached without preview. This browser cannot decode the format or codec, or the file may be damaged.');
     const abort = () => fail(new DOMException('Cancelled', 'AbortError'));
     const success = () => {
       if (finished) return;
@@ -65,10 +73,10 @@ export function prepareMedia(file, kind, signal) {
       const duration = kind === 'video' ? element.duration : null;
       if (!width || !height) { failure(); return; }
       finished = true;
-      const metadata = { name: file.name, type: file.type, size: file.size, width, height, ...(kind === 'video' ? { duration_seconds: Number.isFinite(duration) ? Math.round(duration * 10) / 10 : null } : {}) };
+      const metadata = { preview_available: true, name: file.name, type: file.type, size: file.size, width, height, ...(kind === 'video' ? { duration_seconds: Number.isFinite(duration) ? Math.round(duration * 10) / 10 : null } : {}) };
       clear(); resolve({ url, metadata, dispose: release });
     };
-    const timer = setTimeout(() => fail(new Error('Preview timed out. Try a smaller file or a different format.')), 12000);
+    const timer = setTimeout(() => unavailable('Attached without preview. Preview preparation timed out.'), 12000);
     element.addEventListener(event, success, { once: true });
     element.addEventListener('error', failure, { once: true });
     signal?.addEventListener('abort', abort, { once: true });

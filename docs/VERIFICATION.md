@@ -14,7 +14,7 @@
 
 - Text input → API → rendered report.
 - Keyboard tab navigation and theme switching.
-- Corrupt PNG, unsupported video, and oversized-video rejection; image drag/drop.
+- Undecodable PNG/MOV attachment fallback, oversized-video rejection, and image drag/drop.
 - Valid PNG dimensions and a generated WebM preview with playback controls.
 - Combined report attachment metadata, removal, reset, and UTF-8 file import.
 - API errors, malformed responses, retry availability, and cancelled-response suppression.

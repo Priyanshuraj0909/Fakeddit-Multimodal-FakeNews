@@ -1,0 +1,7 @@
+Sample news article for testing FakeEdit
+
+A community library announced a weekend workshop on digital literacy. Participants will learn how to compare sources, check publication dates, and distinguish opinions from evidence.
+
+UTF-8 character check: café, naïve, résumé — हिंदी में नमस्ते।
+
+This is fictional sample text for testing file import and descriptive analysis. It is not verified news.

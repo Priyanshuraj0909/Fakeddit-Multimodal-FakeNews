@@ -27,24 +27,26 @@
 
   get('tab-image').click();
   upload('image', new File(['not a photo'], 'broken.png', { type: 'image/png' }));
-  await waitFor(() => get('upload-error').textContent.includes('decoded'), 'Corrupt-image error missing');
-  assert(get('image-attachment').hidden, 'Corrupt image shown as valid');
+  await waitFor(() => !get('image-attachment').hidden, 'Fallback attachment missing');
+  assert(get('image-preview').hidden && get('image-info').textContent.includes('without preview'), 'Undecodable image incorrectly previewed');
   const canvas = document.createElement('canvas'); canvas.width = 160; canvas.height = 90;
   const context = canvas.getContext('2d'); context.fillStyle = '#b5a0ff'; context.fillRect(0, 0, 160, 90);
   const image = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
   const imageTransfer = new DataTransfer();
   imageTransfer.items.add(new File([image], 'evidence.png', { type: 'image/png' }));
   get('image-dropzone').dispatchEvent(new DragEvent('drop', { dataTransfer: imageTransfer, bubbles: true, cancelable: true }));
-  await waitFor(() => !get('image-attachment').hidden, 'Valid image not previewed');
+  await waitFor(() => !get('image-preview').hidden && get('image-info').textContent.includes('160 × 90'), 'Valid image not previewed');
   assert(get('image-info').textContent.includes('160 × 90'), 'Image dimensions incorrect');
   assert(get('result').hidden, 'Old report survived an evidence change');
-  results.push('Corrupt image rejected; valid image decoded');
+  results.push('Undecodable image fallback; valid image decoded');
 
   get('tab-video').click();
   upload('video', new File([new Uint8Array(50 * 1024 * 1024 + 1)], 'large.mp4', { type: 'video/mp4' }));
   await waitFor(() => get('upload-error').textContent.includes('too large'), 'Oversized-video error missing');
   upload('video', new File(['unsupported'], 'clip.mov', { type: 'video/quicktime' }));
-  await waitFor(() => get('upload-error').textContent.includes('MP4 or WebM'), 'Unsupported-video error missing');
+  await waitFor(() => !get('video-attachment').hidden, 'MOV attachment missing');
+  assert(get('video-preview').hidden && get('video-info').textContent.includes('without preview'), 'Undecodable MOV incorrectly previewed');
+  get('remove-video').click();
   const stream = canvas.captureStream(10);
   const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
   const chunks = [];

@@ -42,10 +42,10 @@ The deployed app runs without model artifacts and returns **descriptive signals,
 
 - **Unified evidence composition:** keep text, one image, and one video together; switch between keyboard-accessible input tabs without losing valid attachments.
 - **Editable text and file import:** revise a headline or article, try an example, or import a UTF-8 `.txt` excerpt with a 10,000-character limit.
-- **Drag-and-drop media previews:** inspect PNG/JPEG/WebP images up to 10 MB and browser-supported MP4/WebM videos up to 50 MB. Media bytes stay on the device.
+- **Drag-and-drop media previews:** attach common images, HEIC/TIFF/RAW images, and MP4/WebM/MOV/MKV/AVI videos, with limits of 10 MB per image and 50 MB per video. Browser-decodable media is previewed; other recognized formats remain attached with an explicit preview-unavailable notice. Media bytes stay on the device.
 - **Professional responsive interface:** dark/light themes, reusable CSS tokens, minimalist cards, smooth transitions, visible focus states, and reduced-motion support.
 - **Reliable asynchronous interactions:** request timeouts, cancellation on evidence changes, stale-response suppression, response-schema validation, and recoverable errors.
-- **Managed preview resources:** reject unsupported, empty, oversized, or undecodable files; release object URLs when previews fail, change, or are removed.
+- **Managed preview resources:** reject non-media, empty, and oversized files; retain metadata for unpreviewable attachments and release object URLs when previews fail, change, or are removed.
 - **Portable evidence reports:** export JSON containing analysis results, a timestamp, and preview-only attachment metadata; exclude blob URLs and raw media files.
 - **Reproducible ML workflows:** train-only TF-IDF fitting, validation-based model selection/early stopping, separate test evaluation, saved metrics, and post-ID alignment checks.
 - **Automated quality checks:** Python regression tests, native Node.js tests, a Chromium browser smoke script, and GitHub Actions on pushes and pull requests.

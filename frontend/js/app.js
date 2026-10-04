@@ -1,10 +1,13 @@
 import { requestJSON, validateAnalysis } from './api.js';
-import { prepareMedia, readTextFile, formatSize } from './media.js';
+import { prepareMedia, readTextFile, formatSize, MEDIA_EXTENSIONS } from './media.js';
 import { createStore, buildReport } from './state.js';
 
 const byId = id => document.getElementById(id);
 const store = createStore();
 const kinds = ['text', 'image', 'video'];
+for (const kind of ['image', 'video']) {
+  byId(`${kind}-file`).accept = [kind + '/*', ...MEDIA_EXTENSIONS[kind].map(extension => '.' + extension)].join(',');
+}
 const uploadControllers = new Map();
 const uploads = new Set();
 let textImportVersion = 0;
@@ -60,10 +63,12 @@ function renderMedia(kind, media) {
   if (kind === 'video') preview.load();
   byId(`${kind}-attachment`).hidden = !media;
   if (media) {
-    preview.src = media.url;
+    preview.hidden = !media.url;
+    byId(`${kind}-preview-note`).hidden = Boolean(media.url);
+    if (media.url) preview.src = media.url;
     byId(`${kind}-name`).textContent = media.metadata.name;
     const duration = media.metadata.duration_seconds;
-    byId(`${kind}-info`).textContent = `${media.metadata.width} × ${media.metadata.height} px · ${formatSize(media.metadata.size)}${kind === 'video' ? ` · ${duration === null ? 'duration unavailable' : `${duration}s`}` : ''}`;
+    byId(`${kind}-info`).textContent = !media.url ? `${formatSize(media.metadata.size)} · ${media.metadata.preview_note}` : `${media.metadata.width} × ${media.metadata.height} px · ${formatSize(media.metadata.size)}${kind === 'video' ? ` · ${duration === null ? 'duration unavailable' : `${duration}s`}` : ''}`;
   } else {
     byId(`${kind}-name`).textContent = '';
     byId(`${kind}-info`).textContent = '';
@@ -162,7 +167,7 @@ async function attachMedia(kind, files) {
     const media = await prepareMedia(files[0], kind, controller.signal);
     if (controller.signal.aborted) { media.dispose(); return; }
     const previous = store.get().media[kind];
-    store.update({ media: { [kind]: media }, uploadStatus: `${kind === 'image' ? 'Image' : 'Video'} ready. Preview stays on your device.` });
+    store.update({ media: { [kind]: media }, uploadStatus: media.url ? `${kind === 'image' ? 'Image' : 'Video'} ready. Preview stays on your device.` : media.metadata.preview_note });
     previous?.dispose();
   } catch (error) {
     if (error.name !== 'AbortError') store.update({ uploadError: error.message, uploadStatus: '' });
