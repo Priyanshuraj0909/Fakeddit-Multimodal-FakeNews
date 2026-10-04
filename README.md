@@ -208,7 +208,7 @@ npm run check
 npm test
 ```
 
-The current verification record contains **8 Python tests and 8 frontend tests**. They cover request validation, corrupt/missing model artifacts, training outputs, post-ID preservation, embedding alignment, upload limits, UTF-8 decoding, timeouts, and cancellation.
+The current verification record contains **9 Python tests and 8 frontend tests**. They cover request validation, corrupt/missing model artifacts, training outputs, post-ID preservation, embedding alignment, upload limits, UTF-8 decoding, timeouts, and cancellation.
 
 With the server running, verify the user flow in Chromium:
 
@@ -259,6 +259,12 @@ python -m pip freeze > artifacts/text-baseline/environment.txt
 Synthetic test fixtures validate software behavior only; they are not benchmark evidence or a shipped classifier.
 
 ## Deployment & Engineering Decisions
+
+The stable production URL is public. Preview/generated deployment URLs retain Vercel Authentication. See [deployment and access settings](docs/DEPLOYMENT.md). Verify public access without a login using:
+
+```bash
+python scripts/check_deployment.py
+```
 
 The [production app](https://fakeddit-multimodal-fakenews.vercel.app) is hosted on Vercel and connected to this repository's `main` branch. `pyproject.toml` declares `api.index:app`; `vercel.json` configures FastAPI deployment and excludes datasets, tests, historical results, and notebooks from the function bundle. GitHub Actions checks Python and frontend code on every push and pull request; Vercel automatically redeploys changes to `main`.
 

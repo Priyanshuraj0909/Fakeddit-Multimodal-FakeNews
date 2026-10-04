@@ -25,6 +25,13 @@ def test_api_validation_and_signal_mode():
     assert data['phrases'] == ['shocking']
 
 
+def test_public_routes_support_availability_checks():
+    for path in ('/', '/api/health'):
+        response = client.head(path)
+        assert response.status_code == 200
+        assert response.content == b''
+
+
 def test_missing_model(monkeypatch, tmp_path):
     monkeypatch.setattr(index, 'MODEL_DIR', tmp_path)
     assert client.get('/api/health').json()['model_available'] is False

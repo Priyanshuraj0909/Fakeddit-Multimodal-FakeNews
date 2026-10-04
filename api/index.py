@@ -31,6 +31,7 @@ def clean_text(value: str) -> str:
 
 
 @app.get("/api/health")
+@app.head("/api/health", include_in_schema=False)
 def health():
     model_available = (
         (MODEL_DIR / "model.joblib").is_file()
@@ -74,6 +75,7 @@ def predict(payload: TextInput):
 
 
 @app.get("/")
+@app.head("/", include_in_schema=False)
 def home():
     return FileResponse(ROOT / "frontend/index.html")
 

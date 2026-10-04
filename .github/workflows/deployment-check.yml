@@ -1,0 +1,23 @@
+name: Verify public deployment
+on:
+  deployment_status:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-access:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.deployment_status.state == 'success' &&
+       (github.event.deployment_status.environment == 'Production' ||
+        github.event.deployment_status.environment == 'production'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python scripts/check_deployment.py
