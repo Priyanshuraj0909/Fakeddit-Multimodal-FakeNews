@@ -3,7 +3,8 @@
   "framework": "fastapi",
   "functions": {
     "backend/app/main.py": {
-      "excludeFiles": "{notebooks/**,results/**,tests/**,.venv/**,data/**}"
+      "excludeFiles": "{notebooks/**,results/**,tests/**,.venv/**,data/**}",
+      "maxDuration": 60
     }
   }
 }

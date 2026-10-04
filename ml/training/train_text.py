@@ -38,7 +38,7 @@ def check_disjoint(frames):
                 raise ValueError("Post IDs overlap across train/validation/test splits")
 
 
-def train(train_path, validation_path, test_path, output, text_column="clean_title", label_column="2_way_label", labels=None, label_source="Numeric dataset classes; semantic meanings not supplied"):
+def train(train_path, validation_path, test_path, output, text_column="clean_title", label_column="2_way_label", labels=None, label_source="Numeric dataset classes; semantic meanings not supplied", max_features=100000):
     frames = [read_split(p, text_column, label_column) for p in (train_path, validation_path, test_path)]
     check_disjoint(frames)
     check_content_disjoint(frames, text_column)
@@ -46,7 +46,7 @@ def train(train_path, validation_path, test_path, output, text_column="clean_tit
     training, validation, test = frames
     candidates = []
     for regularization in (0.1, 1.0, 10.0):
-        model = Pipeline([("tfidf", TfidfVectorizer(ngram_range=(1, 2), max_features=100000, sublinear_tf=True)),
+        model = Pipeline([("tfidf", TfidfVectorizer(ngram_range=(1, 2), max_features=max_features, sublinear_tf=True)),
                           ("classifier", LogisticRegression(C=regularization, max_iter=1000, random_state=42))])
         model.fit(training[text_column], training[label_column])
         score = f1_score(validation[label_column], model.predict(validation[text_column]), average="macro", zero_division=0)
@@ -78,13 +78,14 @@ def main():
     for split in ("train", "validation", "test"):
         parser.add_argument(f"--{split}", required=True)
     parser.add_argument("--output", default="models/exported/text-baseline")
+    parser.add_argument("--max-features", type=int, default=100000)
     parser.add_argument("--text-column", default="clean_title")
     parser.add_argument("--label-column", default="2_way_label")
     parser.add_argument("--labels", help="JSON class 0/1 label mapping verified against the dataset")
     parser.add_argument("--label-source", default="Numeric dataset classes; semantic meanings not supplied")
     args = parser.parse_args()
     print(json.dumps(train(args.train, args.validation, args.test, args.output, args.text_column, args.label_column,
-                           json.loads(Path(args.labels).read_text()) if args.labels else None, args.label_source), indent=2))
+                           json.loads(Path(args.labels).read_text()) if args.labels else None, args.label_source, args.max_features), indent=2))
 
 
 if __name__ == "__main__":

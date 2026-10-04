@@ -6,19 +6,26 @@ import logging
 from importlib.util import find_spec
 from functools import lru_cache
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from backend.app.schemas.text import TextInput
+from backend.app.schemas.detection import DetectionInput
+from backend.app.services import verification
+from backend.app.core.rate_limit import ResearchLimit
+from ml.inference import portable_text
+from starlette.concurrency import run_in_threadpool
 
 from backend.app.services.signals import analyze
 from ml.inference import multimodal
 from backend.app.api.uploads import router as upload_router, UploadBodyLimit, image_upload_limit
 
 ROOT = Path(__file__).resolve().parents[2]
-MODEL_DIR = Path(os.environ.get("FAKEDDIT_MODEL_DIR", str(ROOT / "models/exported/text-baseline")))
-app = FastAPI(title="Fakeddit Research API", version="2.0.0")
+DEFAULT_MODEL_DIR = ROOT / "models/exported/text-baseline"
+MODEL_DIR = Path(os.environ.get("FAKEDDIT_MODEL_DIR", str(DEFAULT_MODEL_DIR)))
+app = FastAPI(title="Fakeddit Fake News Detector API", version="2.1.0")
 logger = logging.getLogger(__name__)
+research_limit = ResearchLimit()
 app.add_middleware(UploadBodyLimit)
 app.include_router(upload_router)
 
@@ -30,9 +37,19 @@ def clean_text(value: str) -> str:
     return value
 
 
+def use_portable():
+    return MODEL_DIR == DEFAULT_MODEL_DIR and 'FAKEDDIT_MODEL_DIR' not in os.environ and portable_text.RELEASE.is_file()
+
+
 @app.get("/api/health")
 @app.head("/api/health", include_in_schema=False)
 def health():
+    if use_portable():
+        try:
+            portable_text.load_release(str(portable_text.RELEASE))
+            return {"status": "ok", "model_available": True, "model_status": "ready", "model_kind": "portable_fakeddit_text", "version": "2.1.0"}
+        except (ValueError, OSError, KeyError):
+            return {"status": "ok", "model_available": False, "model_status": "invalid_artifacts", "version": "2.1.0"}
     dependencies = all(find_spec(name) is not None for name in ("joblib", "sklearn", "numpy", "scipy"))
     artifacts = all((MODEL_DIR / name).is_file() for name in ("model.joblib", "metrics.json"))
     reason = "missing_artifacts" if not artifacts else "missing_dependencies" if not dependencies else "ready"
@@ -42,7 +59,7 @@ def health():
         except Exception:
             logger.exception("Text checkpoint readiness failed")
             reason = "invalid_artifacts"
-    return {"status": "ok", "model_available": reason == "ready", "model_status": reason, "version": "2.0.0"}
+    return {"status": "ok", "model_available": reason == "ready", "model_status": reason, "version": "2.1.0"}
 
 
 @app.get("/api/capabilities")
@@ -56,7 +73,9 @@ def capabilities():
         "multimodal_classifier": pair_model,
         "image_inference": pair_model["available"],
         "video_inference": False,
-        "fact_verification": False,
+        "fact_verification": verification.configuration()['available'],
+        "verification": verification.configuration(),
+        "news_detection": True,
         "limits": {"text_characters": 10000, "image_bytes": 10 * 1024 * 1024, "inference_image_bytes": image_upload_limit(), "video_bytes": 50 * 1024 * 1024},
         "note": "Reports describe language and supplied media metadata. They do not establish factual truth.",
     }
@@ -98,6 +117,8 @@ def predict(payload: TextInput):
     if not readiness["model_available"]:
         raise HTTPException(503, f"Text classifier unavailable: {readiness['model_status']}. The text explorer remains available.")
     try:
+        if use_portable():
+            return {"mode": "portable_text", **portable_text.predict(text)}
         model, metadata = load_model(str(MODEL_DIR))
         import numpy as np
         probabilities = np.asarray(model.predict_proba([text])[0], dtype=float)
@@ -113,6 +134,35 @@ def predict(payload: TextInput):
     except Exception:
         logger.exception("Trained model inference failed")
         raise HTTPException(503, "Model artifacts or inference dependencies are incomplete.")
+
+
+@app.post('/api/detect')
+async def detect_news(payload: DetectionInput, request: Request):
+    text = clean_text(payload.text)
+    if payload.source_url and not verification.safe_url(payload.source_url):
+        raise HTTPException(422, 'Use a public HTTP or HTTPS source URL.')
+    if payload.publication_date:
+        from datetime import date
+        try:
+            date.fromisoformat(payload.publication_date)
+        except ValueError:
+            raise HTTPException(422, 'Publication date must use YYYY-MM-DD.')
+    try:
+        headline = next(line.strip() for line in text.splitlines() if line.strip())[:400]
+        prediction = await run_in_threadpool(predict, TextInput(text=headline))
+        model = {"status": "ready", **{key: value for key, value in prediction.items() if key != 'mode'}}
+        model['assessed_text'] = headline
+    except HTTPException:
+        model = {"status": "unavailable", "label": "Model unavailable", "probabilities": {},
+                 "note": "No trained model prediction could be produced."}
+    config = verification.configuration()
+    identity = request.client.host if request.client else 'unknown'
+    if config['available'] and not research_limit.allow(identity):
+        evidence = verification.unavailable('rate_limited')
+    else:
+        evidence = await verification.verify(text, payload.source_url, payload.publication_date)
+    return {"mode": "news_detection", "model_assessment": model, "verification": evidence,
+            "note": "Model prediction and source verification answer different questions. A model score is not a factual verdict."}
 
 
 @app.get("/")

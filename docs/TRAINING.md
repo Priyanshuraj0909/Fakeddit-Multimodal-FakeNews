@@ -118,7 +118,7 @@ It saves its own metrics/errors/model and requires separate evaluation. It is ne
 
 ## Deployment limits
 
-The current Vercel app remains a lightweight explorer with classifier modes disabled while artifacts are absent. Full CLIP inference needs suitable compute and installed optional dependencies; no new paid service was provisioned.
+The Vercel app now bundles the evaluated portable text-v1 baseline. Paired CLIP inference remains unavailable until compatible image/text checkpoints are installed. Full CLIP inference needs suitable compute and installed optional dependencies; no new paid service was provisioned.
 
 [Vercel's request-body limit](https://vercel.com/docs/functions/limitations) is 4.5 MB. The app advertises a conservative 4 MB image inference limit on Vercel, leaving multipart headroom; local inference accepts 10 MB. Browser-local previews still allow 10 MB images and 50 MB videos. Configure model hosting separately after measuring resource needs.
 
@@ -128,3 +128,15 @@ Automated tests use generated images, synthetic independent splits, a small XGBo
 
 
 Structure updated 2026-10-05: see README.md and PLAN.md for current module locations and phase status. Dated historical findings above describe their original review context.
+
+## Reproduce text-v1
+
+The three official Google Drive files (publisher README → v2 data → multimodal_only_samples) are named multimodal_train.tsv, multimodal_validate.tsv and multimodal_test_public.tsv. Put them in data/raw. Preparation validates that binary label 1 matches six-way class 0 (true) for every row, reserves earlier split IDs/content, removes exact duplicates, and samples fixed-seed subsets.
+
+```bash
+python scripts/prepare_text_release.py
+python scripts/train.py text --train data/processed/text-release-v1/train.csv --validation data/processed/text-release-v1/validation.csv --test data/processed/text-release-v1/test.csv --labels data/processed/text-release-v1/labels.json --label-source https://github.com/entitize/Fakeddit/issues/14 --max-features 40000 --output models/exported/text-release-v1
+python scripts/export_text_release.py --directory models/exported/text-release-v1 --provenance data/processed/text-release-v1/provenance.json --parity-dataset data/processed/text-release-v1/test.csv
+```
+
+Use a fresh output directory for repeat experiments. The portable export is intentionally versioned; datasets and joblib outputs are ignored. See MODEL.md and TEXT_MODEL_RELEASE.json for actual evaluation and limitations.

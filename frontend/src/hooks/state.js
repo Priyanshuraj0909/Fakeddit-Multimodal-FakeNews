@@ -1,6 +1,6 @@
 /** One state store; file preview resources are owned by the UI controller. */
 export function createStore() {
-  let state = Object.freeze({ text: '', tab: 'text', mode: 'analyze', context: Object.freeze({ source_url: '', publication_date: '', verification_notes: '' }), status: 'idle', report: null, error: '', uploadError: '', uploadStatus: '', media: Object.freeze({ image: null, video: null }) });
+  let state = Object.freeze({ text: '', tab: 'text', mode: 'detect', context: Object.freeze({ source_url: '', publication_date: '', verification_notes: '' }), status: 'idle', report: null, error: '', uploadError: '', uploadStatus: '', media: Object.freeze({ image: null, video: null }) });
   const listeners = new Set();
   return {
     get: () => state,

@@ -14,7 +14,7 @@ def check(base_url):
         headers = {'User-Agent': 'Fakeddit-Deployment-Check/1.0'}
         if body is not None:
             headers['Content-Type'] = 'application/json'
-        with urlopen(Request(base_url + path, data=body, headers=headers, method=method), timeout=15) as response:
+        with urlopen(Request(base_url + path, data=body, headers=headers, method=method), timeout=65 if path == '/api/detect' else 15) as response:
             if response.status != 200 or urlparse(response.url).netloc != host:
                 raise RuntimeError(f'{path}: expected public HTTP 200 without a login redirect')
             return response.read().decode()
@@ -27,7 +27,7 @@ def check(base_url):
     request('/api/health', method='HEAD')
     if health.get('status') != 'ok':
         raise RuntimeError('API health check failed')
-    for path in ('/favicon.ico', '/static/favicon.svg', '/static/src/components/workspace.css', '/static/src/pages/workspace.js', '/static/src/services/api.js', '/static/src/utils/media.js', '/static/src/hooks/state.js'):
+    for path in ('/favicon.ico', '/static/favicon.svg', '/static/src/components/workspace.css', '/static/src/pages/workspace.js', '/static/src/services/api.js', '/static/src/utils/media.js', '/static/src/hooks/state.js', '/static/src/components/detection-report.js'):
         if not request(path).strip():
             raise RuntimeError(f'{path}: empty asset')
     capabilities = json.loads(request('/api/capabilities'))
@@ -36,7 +36,10 @@ def check(base_url):
     report = json.loads(request('/api/analyze', method='POST', payload={'text': 'A sample headline for deployment verification.'}))
     if report.get('mode') != 'descriptive' or report.get('word_count', 0) < 1:
         raise RuntimeError('Analysis endpoint did not return a valid report')
-    return {'url': base_url, 'status': 'passed', 'version': health.get('version'), 'checks': ['public homepage', 'GET/HEAD availability', 'frontend assets', 'API health', 'capabilities', 'text analysis']}
+    detection = json.loads(request('/api/detect', method='POST', payload={'text': 'Scientists discover a new species in the rainforest'}))
+    if detection.get('mode') != 'news_detection' or detection.get('model_assessment', {}).get('status') not in ('ready', 'uncertain'):
+        raise RuntimeError('Trained news classifier did not return an assessment')
+    return {'url': base_url, 'status': 'passed', 'version': health.get('version'), 'checks': ['public homepage', 'GET/HEAD availability', 'frontend assets', 'API health', 'capabilities', 'text analysis', 'trained news detection']}
 
 
 if __name__ == '__main__':

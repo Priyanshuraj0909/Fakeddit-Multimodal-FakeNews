@@ -16,9 +16,10 @@
   };
   const results = [];
   await waitFor(() => get('connection').dataset.status === 'online', 'Capabilities status never became online');
-  assert(Array.from(get('mode').options).map(option => option.value).join(',') === 'analyze,predict,multimodal', 'Analysis modes missing or malformed');
+  assert(Array.from(get('mode').options).map(option => option.value).join(',') === 'detect,analyze,predict,multimodal', 'Analysis modes missing or malformed');
   results.push('Capabilities status and all analysis modes');
   get('reset').click();
+  get('mode').value = 'analyze'; get('mode').dispatchEvent(new Event('change'));
   get('analysis-form').requestSubmit();
   assert(get('form-error').textContent.includes('Add text'), 'Missing-text error not shown');
   get('sample').click(); get('analysis-form').requestSubmit();
@@ -54,7 +55,7 @@
   try {
     window.fetch = async (path, options) => {
       if (path !== '/api/predict/multimodal') return realFetch(path, options);
-      pairedRequest = options.body instanceof FormData && options.body.get('image').name === 'evidence.png' && options.body.get('text').includes('BREAKING');
+      pairedRequest = options.body instanceof FormData && options.body.get('image').name === 'evidence.png' && options.body.get('text').includes('NASA');
       return new Response(JSON.stringify({ mode: 'trained_multimodal', task: 'fakeddit_binary', image_assessed: true, label: 'Mock class 1',
         scores: { 'Mock class 0': .25, 'Mock class 1': .75 },
         note: 'MOCKED MODEL response: browser integration only' }));
@@ -112,6 +113,7 @@
   get('remove-video').click();
   assert(get('video-attachment').hidden && !get('video-preview').hasAttribute('src'), 'Video resource not cleared');
   get('reset').click();
+  get('mode').value = 'analyze'; get('mode').dispatchEvent(new Event('change'));
   upload('text', new File(['Imported UTF-8 claim café'], 'claim.txt', { type: 'text/plain' }));
   await waitFor(() => get('headline').value.includes('café'), 'Text file import failed');
   results.push('Removal/reset and UTF-8 import');
@@ -137,6 +139,7 @@
   assert(document.documentElement.dataset.theme !== originalTheme, 'Theme did not change');
   get('theme-toggle').click();
   get('reset').click();
+  get('mode').value = 'analyze'; get('mode').dispatchEvent(new Event('change'));
   get('sample').click(); get('analysis-form').requestSubmit();
   await waitFor(() => !get('result').hidden, 'Final report did not render');
   results.push('Theme toggle');

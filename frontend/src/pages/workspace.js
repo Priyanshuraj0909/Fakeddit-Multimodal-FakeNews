@@ -1,3 +1,4 @@
+import { renderDetection } from '../components/detection-report.js';
 import { requestJSON, validateAnalysis } from '../services/api.js';
 import { prepareMedia, readTextFile, formatSize, MEDIA_EXTENSIONS } from '../utils/media.js';
 import { createStore, buildReport, inspectMedia } from '../hooks/state.js';
@@ -37,6 +38,16 @@ function setText(text) {
 function renderReport(report) {
   byId('metrics').replaceChildren();
   if (!report) return;
+  const detection = report.mode === 'news_detection';
+  byId('detection-report').hidden = !detection;
+  byId('metrics').hidden = detection;
+  byId('observations').hidden = detection;
+  if (detection) {
+    byId('verdict').textContent = 'News assessment complete';
+    byId('report-kind').textContent = 'MODEL + SOURCE EVIDENCE';
+    byId('result-note').textContent = report.note;
+    renderDetection(report, byId('detection-report'));
+  } else {
   byId('verdict').textContent = report.mode === 'media_inspection' ? 'Media inspection complete.' : report.mode === 'descriptive' ? 'Signals worth exploring.' : report.label;
   byId('report-kind').textContent = report.mode === 'media_inspection' ? 'LOCAL MEDIA INSPECTION' : report.mode === 'trained_multimodal' ? 'TEXT + IMAGE MODEL ASSESSMENT' : 'TEXT ANALYSIS';
   byId('result-note').textContent = report.note;
@@ -44,7 +55,7 @@ function renderReport(report) {
     ? [['Attachments', report.attachment_count], ['Previews available', report.preview_count], ['Combined size', formatSize(report.total_bytes)]]
     : report.mode === 'descriptive'
     ? [['Words', report.word_count], ['Characters', report.character_count], ['Uppercase letters', `${Math.round(report.uppercase_ratio * 100)}%`], ['Exclamation marks', report.exclamation_count]]
-    : Object.entries(report.scores || report.probabilities).map(([label, value]) => [label, `${(value * 100).toFixed(1)}%`]);
+    : Object.entries(report.scores || report.probabilities || {}).map(([label, value]) => [label, `${(value * 100).toFixed(1)}%`]);
   for (const [label, value] of metrics) {
     const metric = document.createElement('div'); metric.className = 'metric';
     const strong = document.createElement('strong'); strong.textContent = value;
@@ -56,6 +67,7 @@ function renderReport(report) {
     : report.mode === 'descriptive'
     ? (report.phrases.length ? `Emphasis phrases: ${report.phrases.join(', ')}. These can appear in accurate and inaccurate reporting.` : 'No phrases from the small emphasis list were found. This does not establish credibility.')
     : 'Model scores describe the fitted dataset classes. They are not validated confidence or truth probabilities; review independent evidence.';
+  }
   byId('report-context').textContent = [report.context.source_url && `Source supplied: ${report.context.source_url}`, report.context.publication_date && `Publication date supplied: ${report.context.publication_date}`, report.context.verification_notes && `Your verification notes: ${report.context.verification_notes}`].filter(Boolean).join(' · ');
   byId('report-context').hidden = !byId('report-context').textContent;
   const attachments = Object.entries(report.attachments);
@@ -108,7 +120,7 @@ store.subscribe(state => {
   byId('evidence-count').textContent = `${sourceCount} ${sourceCount === 1 ? 'source' : 'sources'}`;
   const loading = state.status === 'loading';
   byId('submit').disabled = loading || uploads.size > 0;
-  byId('submit-label').textContent = loading ? 'Analyzing…' : hasText ? 'Analyze text' : sourceCount ? 'Inspect media' : 'Analyze text';
+  byId('submit-label').textContent = loading ? (state.mode === 'detect' ? 'Checking news…' : 'Analyzing…') : hasText ? (state.mode === 'detect' ? 'Detect & verify news' : 'Analyze text') : sourceCount ? 'Inspect media' : state.mode === 'detect' ? 'Detect & verify news' : 'Analyze text';
   byId('report-card').setAttribute('aria-busy', String(loading));
   byId('empty').hidden = loading || Boolean(state.report);
   byId('loading').hidden = !loading;
@@ -146,13 +158,13 @@ byId('headline').addEventListener('input', () => {
 });
 byId('sample').addEventListener('click', () => {
   textImportVersion += 1;
-  setText('BREAKING: You won\'t believe this shocking discovery! Read the original report before sharing.');
+  setText('NASA confirms the Moon is made of cheese.');
   byId('headline').focus();
 });
 byId('mode').addEventListener('change', () => {
   invalidateReport();
   store.update({ mode: byId('mode').value });
-  byId('mode-help').textContent = byId('mode').value === 'multimodal' ? 'Sends text and one image to the trained model. Video is not assessed. Scores are model assessments, not verified facts.' : byId('mode').value === 'predict' ? 'Text-only dataset classification. Media is not included in inference.' : 'Observable language patterns. No truth verdict.';
+  byId('mode-help').textContent = byId('mode').value === 'detect' ? 'Predicts dataset patterns and researches the actual claims with Groq. Read the evidence links; unclear claims may remain unverified.' : byId('mode').value === 'multimodal' ? 'Sends text and one image to the trained model. Video is not assessed. Scores are model assessments, not verified facts.' : byId('mode').value === 'predict' ? 'Text-only dataset classification. Media is not included in inference.' : 'Observable language patterns. No truth verdict.';
 });
 
 byId('text-file').addEventListener('change', async event => {
@@ -228,10 +240,10 @@ byId('reset').addEventListener('click', () => {
   textImportVersion += 1;
   removeMedia('image'); removeMedia('video');
   setText('');
-  byId('mode').value = 'analyze';
-  byId('mode-help').textContent = 'Observable language patterns. No truth verdict.';
+  byId('mode').value = 'detect';
+  byId('mode-help').textContent = 'Trained model prediction plus current source evidence.';
   for (const id of ['source-url', 'publication-date', 'verification-notes']) byId(id).value = '';
-  store.update({ tab: 'text', mode: 'analyze', context: { source_url: '', publication_date: '', verification_notes: '' }, uploadError: '', uploadStatus: '' });
+  store.update({ tab: 'text', mode: 'detect', context: { source_url: '', publication_date: '', verification_notes: '' }, uploadError: '', uploadStatus: '' });
   byId('headline').focus();
 });
 
@@ -260,7 +272,7 @@ byId('analysis-form').addEventListener('submit', async event => {
   const controller = new AbortController(); analysisController = controller;
   store.update({ status: 'loading', report: null, error: '' });
   try {
-    const data = await requestJSON(state.mode === 'multimodal' ? '/api/predict/multimodal' : `/api/${state.mode}`, { text: state.text, ...(state.mode === 'multimodal' ? { image: state.media.image.file, timeout: 60000 } : {}), signal: controller.signal });
+    const data = await requestJSON(state.mode === 'multimodal' ? '/api/predict/multimodal' : `/api/${state.mode}`, { text: state.text, ...(state.mode === 'detect' ? { source_url: state.context.source_url, publication_date: state.context.publication_date, timeout: 65000 } : {}), ...(state.mode === 'multimodal' ? { image: state.media.image.file, timeout: 60000 } : {}), signal: controller.signal });
     if (!controller.signal.aborted) store.update({ status: 'ready', report: buildReport(validateAnalysis(data), state) });
   } catch (error) {
     if (!controller.signal.aborted && error.name !== 'AbortError') store.update({ status: 'error', error: error.message });
@@ -295,11 +307,12 @@ requestJSON('/api/capabilities', { timeout: 10000 }).then(capabilities => {
   if (capabilities.text_analysis !== true || typeof capabilities.text_classifier?.available !== 'boolean'
       || typeof capabilities.multimodal_classifier?.available !== 'boolean') throw new Error('Invalid capabilities response');
   if (Number.isInteger(capabilities.limits?.inference_image_bytes) && capabilities.limits.inference_image_bytes > 0) inferenceImageLimit = capabilities.limits.inference_image_bytes;
+  byId('verification-status').textContent = capabilities.verification?.available ? 'Groq source verification configured' : 'Live verification needs server configuration. Model predictions remain available.';
   const text = capabilities.text_classifier;
   const pair = capabilities.multimodal_classifier;
   byId('connection').dataset.status = 'online';
-  byId('connection-text').textContent = pair.available ? 'Text + image model connected' : text.available ? 'Text model connected' : 'Text explorer online';
-  byId('capability-status').textContent = `Text signals: available · Text classifier: ${text.status.replaceAll('_', ' ')} · Text + image: ${pair.status.replaceAll('_', ' ')} · Video: preview only`;
+  byId('connection-text').textContent = capabilities.verification?.available ? 'Detector + source verification ready' : pair.available ? 'Text + image model connected' : text.available ? 'Text model connected' : 'Text explorer online';
+  byId('capability-status').textContent = `Source verification: ${capabilities.verification?.status?.replaceAll('_', ' ') || 'unavailable'} · Text signals: available · Text classifier: ${text.status.replaceAll('_', ' ')} · Text + image: ${pair.status.replaceAll('_', ' ')} · Video: preview only`;
   for (const [mode, capability, label] of [['predict', text, 'Trained text classifier'], ['multimodal', pair, 'Text + image classifier']]) {
     const option = Array.from(byId('mode').options).find(item => item.value === mode);
     option.disabled = !capability.available;

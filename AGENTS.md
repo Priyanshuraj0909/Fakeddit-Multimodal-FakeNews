@@ -4,6 +4,6 @@ Work from the repository root. Keep the original notebooks and result files as r
 
 Read PLAN.md and the affected phase document before changing scope. Update documentation alongside path/API changes. Do not fabricate predictions, benchmark metrics, datasets, explainability, or completed phases. Missing artifacts must produce explicit unavailable status.
 
-Keep train/validation/test independent; fit preprocessing on training only and select models using validation. Preserve post IDs and check feature alignment and content leakage. Do not commit datasets, weights, secrets, or local environments.
+Keep train/validation/test independent; fit preprocessing on training only and select models using validation. Preserve post IDs and check feature alignment and content leakage. Do not commit datasets, full research checkpoints, secrets, or local environments. The evaluated compact inference release under backend/app/models/releases is intentionally versioned so the user-authorized deployed detector works; record its metrics and provenance.
 
 Run `bash scripts/verify.sh` after code changes. Browser verification is needed for UI behavior changes. Record checks actually run and limitations. GitHub publication follows the user's authorized task scope.

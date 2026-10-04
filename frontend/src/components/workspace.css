@@ -219,3 +219,22 @@ footer { display: flex; justify-content: space-between; align-items: center; gap
 .verification-fields textarea { min-height: 85px; font-size: 11px; }
 .verification-fields p, .capability-status { font-size: 11px; line-height: 1.7; color: var(--muted); }
 #report-context { overflow-wrap: anywhere; }
+
+/* Model prediction and claim evidence are separate report sections. */
+.assessment-section { padding: 20px 0; border-top: 1px solid var(--border, #303440); }
+.assessment-section h4 { margin: 0 0 14px; font-size: 15px; }
+.assessment-verdict { font-size: 19px; font-weight: 700; margin: 10px 0; }
+.assessment-verdict.supported { color: #54bda1; }
+.assessment-verdict.contradicted { color: #ed8b91; }
+.assessment-verdict.mixed, .assessment-verdict.insufficient_evidence, .assessment-verdict.uncertain { color: #bc9b58; }
+.score-row { display: flex; justify-content: space-between; gap: 12px; margin: 10px 0; font-size: 13px; }
+.benchmark-note { font-size: 11px; opacity: .75; line-height: 1.7; margin: 12px 0; }
+.claim-card { border: 1px solid var(--border, #303440); border-radius: 12px; padding: 16px; margin-top: 16px; }
+.claim-card h5, .source-list h5 { font-size: 14px; margin: 0 0 10px; line-height: 1.6; }
+.claim-card p { font-size: 13px; line-height: 1.7; }
+.claim-status { font-size: 11px; opacity: .8; }
+.evidence-links, .source-list { display: grid; gap: 10px; margin-top: 16px; }
+.evidence-links a, .source-list a { color: var(--accent, #a99df8); font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.feature-signal { font-size: 12px; margin: 8px 0; }
+.assessment-section details { margin-top: 14px; font-size: 12px; }
+.assessment-section summary { cursor: pointer; }

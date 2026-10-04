@@ -1,0 +1,119 @@
+{
+  "release": "text-v1",
+  "metrics": {
+    "model": "TF-IDF + LogisticRegression",
+    "seed": 42,
+    "selected_C": 1.0,
+    "validation_macro_f1": 0.8053620247377236,
+    "validation_accuracy": 0.8084,
+    "test_macro_f1": 0.803122349772847,
+    "test_accuracy": 0.8064666666666667,
+    "classification_report": {
+      "0": {
+        "precision": 0.8115038115038115,
+        "recall": 0.8468121007593106,
+        "f1-score": 0.8287820701857859,
+        "support": 8297.0
+      },
+      "1": {
+        "precision": 0.7995900346893724,
+        "recall": 0.756526928241086,
+        "f1-score": 0.7774626293599081,
+        "support": 6703.0
+      },
+      "accuracy": 0.8064666666666667,
+      "macro avg": {
+        "precision": 0.8055469230965919,
+        "recall": 0.8016695145001983,
+        "f1-score": 0.803122349772847,
+        "support": 15000.0
+      },
+      "weighted avg": {
+        "precision": 0.8061799417713325,
+        "recall": 0.8064666666666667,
+        "f1-score": 0.8058491227287287,
+        "support": 15000.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        7026,
+        1271
+      ],
+      [
+        1632,
+        5071
+      ]
+    ],
+    "labels": {
+      "0": "Likely fake / misleading",
+      "1": "Likely real"
+    },
+    "label_source": "https://github.com/entitize/Fakeddit/issues/14#issuecomment-815355653",
+    "task": "fakeddit_binary",
+    "selection_metric": "validation_macro_f1",
+    "preprocessing": "TF-IDF pipeline fitted on training data only",
+    "rows": {
+      "train": 150000,
+      "validation": 15000,
+      "test": 15000
+    },
+    "text_column": "clean_title",
+    "label_column": "2_way_label"
+  },
+  "provenance": {
+    "dataset": "Official Fakeddit v2 multimodal-only samples, text branch only",
+    "source": "https://github.com/entitize/Fakeddit",
+    "seed": 42,
+    "labels": {
+      "0": "Likely fake / misleading",
+      "1": "Likely real"
+    },
+    "label_source": "https://github.com/entitize/Fakeddit/issues/14#issuecomment-815355653; all rows verified: binary 1 iff six-way label 0 (true)",
+    "sampling": "Fixed-seed subsets within official splits after ID and normalized exact-text exclusion",
+    "splits": {
+      "train": {
+        "source": "data/raw/multimodal_train.tsv",
+        "source_sha256": "9894cb4aa2f901c6f29b61ac3d95ce9f7e78c43be8062ae5deb1c219c82497bb",
+        "original_rows": 564000,
+        "eligible_rows": 502605,
+        "excluded_rows": 61395,
+        "selected_rows": 150000,
+        "class_counts": {
+          "0": 84988,
+          "1": 65012
+        }
+      },
+      "validation": {
+        "source": "data/raw/multimodal_validate.tsv",
+        "source_sha256": "c70140ec376e083e3780b5b488c96c8933678ca5800139bfb78c92e95df6946e",
+        "original_rows": 59342,
+        "eligible_rows": 50964,
+        "excluded_rows": 8378,
+        "selected_rows": 15000,
+        "class_counts": {
+          "0": 8335,
+          "1": 6665
+        }
+      },
+      "test": {
+        "source": "data/raw/multimodal_test_public.tsv",
+        "source_sha256": "bc92378e070ca7b1a7497053d1c34cdc3f550be6232a76791a2c722d6d9bbf94",
+        "original_rows": 59319,
+        "eligible_rows": 50806,
+        "excluded_rows": 8513,
+        "selected_rows": 15000,
+        "class_counts": {
+          "0": 8297,
+          "1": 6703
+        }
+      }
+    }
+  },
+  "artifact": {
+    "path": "backend/app/models/releases/text-v1.json.gz",
+    "sha256": "dc86a54c35cd719c431f1a8e61e541547c8e736f4d4abd68a3b8e434f54ec0b8",
+    "bytes": 659355,
+    "parity_check": "200 held-out headlines compared against sklearn, maximum absolute probability error below 1e-10"
+  }
+}

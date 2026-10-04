@@ -46,3 +46,42 @@ test('multimodal requests send a real image and text with multipart boundary man
   assert.equal(captured.headers, undefined);
   assert.throws(() => validateAnalysis({ ...result, scores: { 'Class 0': .6, 'Class 1': .6 } }), /incomplete/);
 });
+
+const detection = () => ({
+  mode: 'news_detection', note: 'Separate assessments',
+  model_assessment: { status: 'ready', label: 'Likely real', probabilities: { 'Likely real': 0.8, 'Likely fake': 0.2 }, note: 'Dataset prediction' },
+  verification: { status: 'completed', verdict: 'supported', summary: 'Documented',
+    claims: [{ statement: 'A specific claim', verdict: 'supported', explanation: 'Direct evidence', evidence_ids: [1] }],
+    sources: [{ id: 1, title: 'Evidence', publisher: 'example.com', url: 'https://example.com/evidence' }] }
+});
+
+test('detector validates model scores and source provenance independently', () => {
+  assert.equal(validateAnalysis(detection()).mode, 'news_detection');
+  const invalidScore = detection(); invalidScore.model_assessment.probabilities['Likely real'] = NaN;
+  assert.throws(() => validateAnalysis(invalidScore));
+  const missingSource = detection(); missingSource.verification.claims[0].evidence_ids = [2];
+  assert.throws(() => validateAnalysis(missingSource));
+  const unsafeURL = detection(); unsafeURL.verification.sources[0].url = 'javascript:alert(1)';
+  assert.throws(() => validateAnalysis(unsafeURL));
+  const unsupported = detection(); unsupported.verification.claims[0].evidence_ids = [];
+  assert.throws(() => validateAnalysis(unsupported));
+});
+
+test('unavailable verification and model abstention are explicit valid reports', () => {
+  const report = detection();
+  report.verification = { status: 'unavailable', verdict: 'not_checked', summary: 'Setup required', claims: [], sources: [] };
+  report.model_assessment = { status: 'abstained', label: 'Insufficient text', probabilities: {}, note: 'No prediction' };
+  assert.equal(validateAnalysis(report), report);
+});
+
+test('news request sends source context without local notes or credentials', async () => {
+  const oldFetch = globalThis.fetch;
+  try {
+    globalThis.fetch = async (_path, options) => {
+      assert.deepEqual(JSON.parse(options.body), { text: 'Claim', source_url: 'https://example.com/source', publication_date: '2026-10-05' });
+      assert.equal(options.headers.Authorization, undefined);
+      return new Response('{}');
+    };
+    await requestJSON('/api/detect', { text: 'Claim', source_url: 'https://example.com/source', publication_date: '2026-10-05' });
+  } finally { globalThis.fetch = oldFetch; }
+});

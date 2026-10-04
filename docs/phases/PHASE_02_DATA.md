@@ -1,9 +1,7 @@
 # Phase 02: Data
 
-Status: Tools implemented; real-data pending. Updated 2026-10-05.
+Status: Official text data prepared. Updated 2026-10-05.
 
-Deliverable: Pair local images by post ID and extract ID-aligned features with content hashes.
+Official Fakeddit v2 multimodal-only text splits downloaded locally, labels cross-checked, exact duplicates excluded and fixed-seed subsets prepared. Raw files remain ignored; image acquisition remains pending.
 
-Remaining: Obtain legitimate datasets and verify labels before extraction.
-
-Acceptance: verify the documented behavior with representative inputs, record actual results, and keep phase status honest about missing assets. See PLAN.md and docs/VERIFICATION.md.
+See docs/MODEL.md, docs/TEXT_MODEL_RELEASE.json and docs/VERIFICATION_SETUP.md.

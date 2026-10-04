@@ -107,6 +107,7 @@ def test_capabilities_do_not_claim_missing_inference(monkeypatch, tmp_path):
 
 
 def test_invalid_prediction_scores_return_service_error(monkeypatch):
+    monkeypatch.setattr(index, 'use_portable', lambda: False)
     class BrokenModel:
         classes_ = np.array([0, 1])
         def predict_proba(self, _):

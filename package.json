@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "test": "node --test tests/frontend/*.test.js",
-    "check": "node --check frontend/src/pages/workspace.js && node --check frontend/src/services/api.js && node --check frontend/src/utils/media.js && node --check frontend/src/hooks/state.js"
+    "check": "node --check frontend/src/pages/workspace.js && node --check frontend/src/services/api.js && node --check frontend/src/utils/media.js && node --check frontend/src/hooks/state.js && node --check frontend/src/components/detection-report.js"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }

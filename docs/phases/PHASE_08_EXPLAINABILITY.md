@@ -1,9 +1,7 @@
 # Phase 08: Explainability
 
-Status: Planned. Updated 2026-10-05.
+Status: Text feature contributions implemented; image attribution pending. Updated 2026-10-05.
 
-Deliverable: Define model-faithful explanations and evaluate their stability.
+The portable linear model exposes weighted TF-IDF contributions. These explain dataset-class scores, not factual truth. Groq evidence citations explain factual assessments. Image explanations and stability studies remain pending.
 
-Remaining: No SHAP, attention visualization or token/image attribution is implemented.
-
-Acceptance: verify the documented behavior with representative inputs, record actual results, and keep phase status honest about missing assets. See PLAN.md and docs/VERIFICATION.md.
+See docs/MODEL.md, docs/TEXT_MODEL_RELEASE.json and docs/VERIFICATION_SETUP.md.

@@ -1,3 +1,5 @@
+Current update — 2026-10-05: an evaluated text-v1 baseline and Groq source-verification integration now exist. See MODEL.md, TEXT_MODEL_RELEASE.json and VERIFICATION_SETUP.md. The dated audit below records earlier gaps, not the current text-detector status.
+
 # Fakeddit project audit
 
 Reviewed 2026-10-04 against the current repository. This is a code and application audit, not an independent reproduction of model accuracy.

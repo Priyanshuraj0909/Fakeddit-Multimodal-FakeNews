@@ -1,9 +1,7 @@
 # Phase 06: Backend
 
-Status: Engineering complete; classifier assets pending. Updated 2026-10-05.
+Status: Combined detector implemented. Updated 2026-10-05.
 
-Deliverable: FastAPI validation, capability status, bounded multipart inference and static frontend.
+/api/detect returns model assessment and separate Groq source verification. Missing credentials/provider errors preserve the model result. Activate GROQ_API_KEY and run live checks.
 
-Remaining: Install verified model artifacts before advertising classification.
-
-Acceptance: verify the documented behavior with representative inputs, record actual results, and keep phase status honest about missing assets. See PLAN.md and docs/VERIFICATION.md.
+See docs/MODEL.md, docs/TEXT_MODEL_RELEASE.json and docs/VERIFICATION_SETUP.md.
