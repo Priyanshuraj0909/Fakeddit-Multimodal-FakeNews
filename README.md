@@ -47,7 +47,7 @@ Model and evidence results can disagree. The application does not combine them i
 
 </details>
 
-*Actual local application captures. Text, image, and video tabs are visible; their availability does not imply image or video classification. Live claim reports require server credentials. No simulated prediction or evidence report is shown.*
+*Actual local application captures from the earlier text-v1 workspace; current text-v2 metrics appear above. Text, image, and video tabs are visible; their availability does not imply image or video classification. Live claim reports require server credentials. No simulated prediction or evidence report is shown.*
 
 ## Capabilities and readiness
 
