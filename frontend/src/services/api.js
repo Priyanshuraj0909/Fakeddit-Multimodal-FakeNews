@@ -18,6 +18,8 @@ export function validateAnalysis(data) {
       || (evidence.status === 'unavailable' ? evidence.verdict !== 'not_checked' : !verdicts.includes(evidence.verdict))) invalid();
     const ids = new Set();
     for (const source of evidence.sources) {
+      if ((source.excerpt !== undefined && (typeof source.excerpt !== 'string' || source.excerpt.length > 4000))
+          || (source.retrieved_at !== undefined && (typeof source.retrieved_at !== 'string' || !Number.isFinite(Date.parse(source.retrieved_at))))) invalid();
       if (!Number.isInteger(source.id) || source.id < 1 || ids.has(source.id)
         || typeof source.title !== 'string' || typeof source.publisher !== 'string') invalid();
       ids.add(source.id);

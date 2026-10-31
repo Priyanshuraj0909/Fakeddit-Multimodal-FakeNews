@@ -10,6 +10,7 @@ from ml.models.classifier import build_classifier
 from ml.models.fusion_model import fuse_features
 from ml.training.train_text import check_disjoint, read_split
 from ml.utils.contracts import check_content_disjoint, read_manifest, digest_file
+from ml.utils.tracking import track_run
 
 
 def load_split(folder):
@@ -84,6 +85,9 @@ def train(train_folder, validation_folder, test_folder, output, compare=False, e
     errors = [{"id": str(row["id"]), "expected": int(row["2_way_label"]), "predicted": int(pred)}
               for (_, row), pred in zip(test.iterrows(), predicted) if int(row["2_way_label"]) != int(pred)]
     (output / "test_errors.json").write_text(json.dumps(errors, indent=2) + "\n")
+    track_run('clip-xgboost', metrics, {'seed': 42, 'encoder_sha256': manifest['encoder_sha256'], 'feature_count': x_train.shape[1],
+              **{name + '_posts_sha256': digest_file(Path(folder) / 'posts.csv') for name, folder in zip(('train', 'validation', 'test'), (train_folder, validation_folder, test_folder))}},
+              reports=(output / 'metrics.json', output / 'manifest.json', output / 'test_errors.json'))
     return metrics
 
 

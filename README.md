@@ -57,7 +57,7 @@ Model and evidence results can disagree. The application does not combine them i
 | Uncertainty and abstention | Implemented | Scores below 0.65 are uncertain; unusable text receives no verdict |
 | Text feature contributions | Implemented | Signed contributions to the linear model score, separate from factual evidence |
 | Claim verification | Implemented; requires `GROQ_API_KEY` | Source research, per-claim verdicts, citations, and explicit provider failure status |
-| Browser workspace | Implemented | Text import, assessment modes, source/date context, JSON export, theme switching, responsive layout |
+| Browser workspace | Implemented | Text import, screenshot OCR, editable extraction, optional browser-local report history and reviews, JSON export, responsive layout |
 | Image/video inspection | Implemented; browser local | Previews and metadata; authenticity is not assessed |
 | CLIP + XGBoost pipeline | Experimental; requires artifacts | Local paired extraction, feature fusion, training, evaluation, and optional API inference |
 | Standalone image benchmark | Pending | No independently evaluated image release bundled |
@@ -113,7 +113,7 @@ flowchart LR
     C -. Same encoder required .-> I
 ```
 
-No database, persistent upload history, OCR, or video classifier is implemented. See [architecture](docs/ARCHITECTURE.md) and [model contracts](docs/MODEL.md).
+English screenshot OCR runs locally using Tesseract.js, with editable text and word locations in JSON exports. Reports and human reviews are saved in this browser only when requested; there is no account database or video classifier. See [architecture](docs/ARCHITECTURE.md) and [model contracts](docs/MODEL.md).
 
 ## Machine learning pipeline
 
@@ -148,11 +148,11 @@ For portable inference, fewer than three tokens, zero usable features, or vocabu
 
 Preparation checks the mapping against every supplied row, preserves post IDs, excludes ID and normalized exact-text overlap, and takes fixed-seed subsets within official splits. TF-IDF is fitted on training only; validation selects the model; test is reserved for final evaluation. Paired training additionally checks image hashes, feature IDs/order, encoder fingerprints, and modality dimensions.
 
-Raw datasets and downloaded images are **not committed**. Distant labels, Reddit/source bias, and incomplete semantic deduplication limit generalization. Near-duplicate and author-disjoint audits remain future work. See [dataset contracts](docs/DATASET.md).
+Raw datasets and downloaded images are **not committed**. Distant labels, Reddit/source bias, and incomplete semantic deduplication limit generalization. An [observational audit](docs/TEXT_GENERALIZATION_AUDIT.json) records author/source overlap and lexical near-duplicate candidates. Source/author-disjoint performance remains unmeasured. A training-subreddit majority baseline scores 100% on this test subset, demonstrating a source-label shortcut; the deployed model does not use this metadata. See [dataset contracts](docs/DATASET.md).
 
 ## Model performance
 
-All values below come from [the recorded text-v1 release](docs/TEXT_MODEL_RELEASE.json); this documentation update does not rerun benchmark training.
+Classification values below come from [the recorded text-v1 release](docs/TEXT_MODEL_RELEASE.json). A separate [reliability experiment](docs/TEXT_RELIABILITY_EVALUATION.json) selected sigmoid calibration on a held-out validation half: test Brier score changed from 0.13851 to 0.13688. Production retains raw scores and the 0.65 heuristic. See [evaluation protocol and limitations](docs/EVALUATION.md).
 
 | Split | Samples | Accuracy | Macro F1 |
 | --- | ---: | ---: | ---: |
@@ -238,6 +238,7 @@ No API authentication or persistence is implemented. Interactive `/docs` and the
 | --- | --- | --- | --- |
 | GET / HEAD | `/api/health` | None | Service status, model availability and readiness |
 | GET | `/api/capabilities` | None | Enabled modes, verification configuration, upload limits |
+| GET | `/api/model-card` | None | Release metrics, provenance, reliability experiment and limitations |
 | POST | `/api/detect` | JSON `text`; optional `source_url`, `publication_date` | `mode`, `model_assessment`, `verification`, `note` |
 | POST | `/api/analyze` | JSON `text` | Descriptive counts/indicators; no truth judgment |
 | POST | `/api/predict` | JSON `text` | Dataset label, model scores/status, release metadata where available |
@@ -261,7 +262,7 @@ curl -X POST http://127.0.0.1:8000/api/predict/multimodal \
 
 Model assessment statuses include `ready`, `uncertain`, `abstained`, and `unavailable`. Completed verification includes a summary, claims with `evidence_ids`, and sources with titles/URLs/publishers; claim verdicts are `supported`, `contradicted`, `mixed`, or `insufficient_evidence`. Provider failure produces unavailable verification and `not_checked`, preserving the model result.
 
-Text must be nonempty and at most 10,000 characters. Schema errors return **422**, unsupported image formats **415**, oversized uploads **413**, and missing/incompatible classifier assets **503**. Paired image limits are 10 MiB locally and 4 MiB on Vercel. Research calls have process-local rate limiting; see [the backend implementation](backend/app/core/rate_limit.py).
+Text must be nonempty and at most 10,000 characters. Schema errors return **422**, unsupported image formats **415**, oversized uploads **413**, and missing/incompatible classifier assets **503**. Paired image limits are 10 MiB locally and 4 MiB on Vercel. Research calls have process-local rate limiting by default, with an optional Redis shared quota; see [the backend implementation](backend/app/core/rate_limit.py).
 
 ## Training and reproducibility
 
@@ -346,7 +347,7 @@ models/               Ignored local encoder snapshots and full checkpoints
 - **Model errors and score interpretation:** false positives and false negatives occur. Scores are uncalibrated; uncertainty thresholds are heuristics. Text contributions explain model patterns, not factual causation.
 - **Evidence quality:** retrieved excerpts can be incomplete, outdated, or unreliable. LLM claim assessments can hallucinate or misinterpret sources. Read cited primary material and check dates/context.
 - **Leakage coverage:** exact content and ID checks do not replace near-duplicate, semantic overlap, or author/source-disjoint evaluation.
-- **Incomplete modalities:** no bundled evaluated CLIP fusion model, image manipulation detector, OCR, or video inference. Local media previews do not verify authenticity.
+- **Incomplete modalities:** no bundled evaluated CLIP fusion model, image manipulation detector, learned image–headline consistency classifier, or video inference. Local media previews do not verify authenticity.
 
 Use reports to guide review. Do not treat them as definitive truth judgments or as the sole basis for consequential decisions.
 
@@ -356,9 +357,13 @@ Use reports to guide review. Do not treat them as definitive truth judgments or 
 - [x] Implement separate claim research, citations, and explicit failure states.
 - [x] Add API/frontend contracts and offline paired training tools.
 - [ ] Train and independently evaluate real CLIP fusion checkpoints and modality ablations.
-- [ ] Evaluate calibration, domain shift, near duplicates, and author/source shortcuts.
+- [x] Record a calibration experiment and observational overlap/source-shortcut audit.
+- [ ] Evaluate temporal and source/author-disjoint generalization.
+- [x] Add editable screenshot OCR and optional browser-local report history.
+- [ ] Train and evaluate image–headline consistency on a suitable paired benchmark.
 - [ ] Evaluate standalone image models and add validated image explanations.
-- [ ] Expand robustness datasets and deployment monitoring.
+- [x] Add request metadata logs, optional Redis quotas and offline MLflow tracking hooks.
+- [ ] Evaluate evidence support with independent human-reviewed claims and expand robustness datasets.
 - [ ] Validate Docker execution and document multimodal resource requirements.
 
 Engineering implementation and real-model readiness are tracked separately in [PLAN.md](PLAN.md) and [phase guides](docs/phases/).
@@ -369,7 +374,7 @@ Engineering implementation and real-model readiness are tracked separately in [P
 | --- | --- |
 | Project workflow | [Master workflow](MASTER_ORCHESTRATOR.md), [implementation plan](PLAN.md), [change log](CHANGELOG.md) |
 | Application | [Architecture](docs/ARCHITECTURE.md), [API](docs/API.md), [backend](backend/README.md) |
-| Data and models | [Dataset](docs/DATASET.md), [models](docs/MODEL.md), [release provenance](docs/TEXT_MODEL_RELEASE.json), [training](docs/TRAINING.md) |
+| Data and models | [Dataset](docs/DATASET.md), [models](docs/MODEL.md), [release provenance](docs/TEXT_MODEL_RELEASE.json), [evaluation](docs/EVALUATION.md), [training](docs/TRAINING.md) |
 | Operations | [Deployment](docs/DEPLOYMENT.md), [verification](docs/VERIFICATION.md), [Groq setup](docs/VERIFICATION_SETUP.md) |
 | Research and audit | [Historical review](PROJECT_REVIEW.md), [project audit](docs/PROJECT_AUDIT.md), [repair report](docs/REPAIR_REPORT.md) |
 

@@ -27,10 +27,13 @@ def check(base_url):
     request('/api/health', method='HEAD')
     if health.get('status') != 'ok':
         raise RuntimeError('API health check failed')
-    for path in ('/favicon.ico', '/static/favicon.svg', '/static/src/components/workspace.css', '/static/src/pages/workspace.js', '/static/src/services/api.js', '/static/src/utils/media.js', '/static/src/hooks/state.js', '/static/src/components/detection-report.js'):
+    for path in ('/favicon.ico', '/static/favicon.svg', '/static/src/components/workspace.css', '/static/src/pages/workspace.js', '/static/src/services/api.js', '/static/src/services/ocr.js', '/static/src/services/history.js', '/static/src/utils/media.js', '/static/src/hooks/state.js', '/static/src/components/detection-report.js'):
         if not request(path).strip():
             raise RuntimeError(f'{path}: empty asset')
     capabilities = json.loads(request('/api/capabilities'))
+    card = json.loads(request('/api/model-card'))
+    if card.get('release') != 'text-v1' or card.get('score_type') != 'uncalibrated_model_scores':
+        raise RuntimeError('Model card did not return the expected release contract')
     if capabilities.get('text_analysis') is not True or capabilities.get('media_inspection') != 'browser_local':
         raise RuntimeError('Capabilities endpoint did not return supported modes')
     report = json.loads(request('/api/analyze', method='POST', payload={'text': 'A sample headline for deployment verification.'}))

@@ -1,9 +1,11 @@
 # Phase 09: Testing
 
-Status: Automated suites implemented. Updated 2026-10-05.
+Status: Automated suites implemented. Updated 2026-10-31.
 
 Deliverable: Python API/ML regression tests, Node frontend tests and browser smoke script.
 
 Remaining: Real-checkpoint integration and real-data evaluation remain pending.
 
 Acceptance: verify the documented behavior with representative inputs, record actual results, and keep phase status honest about missing assets. See PLAN.md and docs/VERIFICATION.md.
+
+2026-10-31: Added reliability, citation-review, lexical audit, OCR lifecycle and history tests. Browser runner covers desktop/mobile and optional real CDN-backed OCR (FAKEDDIT_OCR_LIVE=1). See VERIFICATION.md for checks actually run.

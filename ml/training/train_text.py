@@ -8,8 +8,9 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, f1_score
-from ml.utils.contracts import check_content_disjoint, validate_labels
+from ml.utils.contracts import check_content_disjoint, validate_labels, digest_file
 from sklearn.pipeline import Pipeline
+from ml.utils.tracking import track_run
 
 
 def read_split(path, text_column, label_column):
@@ -70,6 +71,9 @@ def train(train_path, validation_path, test_path, output, text_column="clean_tit
     errors = [{"id": str(row["id"]), "expected": int(row[label_column]), "predicted": int(pred)}
               for (_, row), pred in zip(test.iterrows(), predicted) if int(row[label_column]) != int(pred)]
     (output / "test_errors.json").write_text(json.dumps(errors, indent=2) + "\n")
+    track_run('text-baseline', metrics, {'seed': 42, 'max_features': max_features, 'selected_C': regularization,
+              **{name + '_sha256': digest_file(path) for name, path in zip(('train', 'validation', 'test'), (train_path, validation_path, test_path))}},
+              reports=(output / 'metrics.json', output / 'test_errors.json'))
     return metrics
 
 

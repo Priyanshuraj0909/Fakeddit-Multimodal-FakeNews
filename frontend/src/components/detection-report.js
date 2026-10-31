@@ -53,6 +53,11 @@ export function renderDetection(report, container) {
       const link = element('a', `[${source.id}] ${source.publisher}: ${source.title}`);
       link.href = source.url; link.target = '_blank'; link.rel = 'noopener noreferrer';
       list.append(link);
+      if (source.excerpt) {
+        list.append(element('blockquote', source.excerpt, 'source-excerpt'));
+        list.append(element('p', source.excerpt_note || 'Retrieved excerpt; check the original source for context.', 'benchmark-note'));
+      }
+      if (source.retrieved_at) list.append(element('p', `Retrieved ${new Date(source.retrieved_at).toLocaleString()}`, 'benchmark-note'));
     }
     evidenceCard.append(list);
   }

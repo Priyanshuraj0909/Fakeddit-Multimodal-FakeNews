@@ -40,6 +40,7 @@ def unavailable(reason='missing_api_key'):
         'provider_error': 'Groq could not complete source verification. Retry later; this is not evidence that the claim is true or false.',
         'timeout': 'Source verification timed out. Retry with one specific claim.',
         'rate_limited': 'The verification request limit was reached. Wait a minute and retry.',
+        'shared_quota_denied': 'The shared verification quota was reached or its service is unavailable. Retry later.',
     }
     return {'status': 'unavailable', 'reason': reason, 'verdict': 'not_checked',
             'summary': messages.get(reason, messages['provider_error']), 'claims': [], 'sources': [], 'provider': 'Groq'}
@@ -64,7 +65,8 @@ def collect_sources(message):
                 continue
             seen.add(url)
             sources.append({'id': len(sources)+1, 'url': url, 'title': str(item.get('title') or url)[:400],
-                            'publisher': urlparse(url).hostname, 'content': content[:2500]})
+                            'publisher': urlparse(url).hostname, 'content': content[:2500],
+                            'retrieved_at': datetime.now(timezone.utc).isoformat()})
             if len(sources) >= 10:
                 return sources
     return sources
@@ -85,8 +87,14 @@ def grounded_report(assessment, sources):
     verdicts = {claim['verdict'] for claim in claims}
     verdict = next(iter(verdicts)) if len(verdicts) == 1 else 'mixed' if 'mixed' in verdicts or {'supported', 'contradicted'} <= verdicts else 'insufficient_evidence'
     used = {index for claim in claims for index in claim['evidence_ids']}
+    public_sources = []
+    for source in sources:
+        if source['id'] in used:
+            public_sources.append({**{k: v for k, v in source.items() if k != 'content'},
+                                   'excerpt': ' '.join(source.get('content', '').split()[:25]),
+                                   'excerpt_note': 'Retrieved excerpt; may be truncated. Open the source to check context.'})
     return {'status': 'completed', 'verdict': verdict, 'summary': parsed.summary,
-            'claims': claims, 'sources': [{k: v for k, v in s.items() if k != 'content'} for s in sources if s['id'] in used],
+            'claims': claims, 'sources': public_sources,
             'checked_at': datetime.now(timezone.utc).isoformat(), 'provider': 'Groq',
             'note': 'AI-assisted assessment of retrieved sources. Review each citation; incomplete evidence does not prove a claim false.'}
 

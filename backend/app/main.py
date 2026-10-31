@@ -13,6 +13,7 @@ from backend.app.schemas.text import TextInput
 from backend.app.schemas.detection import DetectionInput
 from backend.app.services import verification
 from backend.app.core.rate_limit import ResearchLimit
+from backend.app.core.observability import RequestTelemetry
 from ml.inference import portable_text
 from starlette.concurrency import run_in_threadpool
 
@@ -27,6 +28,7 @@ app = FastAPI(title="Fakeddit Fake News Detector API", version="2.1.0")
 logger = logging.getLogger(__name__)
 research_limit = ResearchLimit()
 app.add_middleware(UploadBodyLimit)
+app.add_middleware(RequestTelemetry)
 app.include_router(upload_router)
 
 
@@ -79,6 +81,25 @@ def capabilities():
         "limits": {"text_characters": 10000, "image_bytes": 10 * 1024 * 1024, "inference_image_bytes": image_upload_limit(), "video_bytes": 50 * 1024 * 1024},
         "note": "Reports describe language and supplied media metadata. They do not establish factual truth.",
     }
+
+
+@app.get('/api/model-card')
+def model_card():
+    """Release facts, distinct from runtime readiness and live evidence verification."""
+    provenance_path = ROOT / 'docs/TEXT_MODEL_RELEASE.json'
+    if not provenance_path.is_file():
+        raise HTTPException(status_code=503, detail='Model release provenance is unavailable')
+    provenance = json.loads(provenance_path.read_text())
+    evaluation_path = ROOT / 'docs/TEXT_RELIABILITY_EVALUATION.json'
+    evaluation = json.loads(evaluation_path.read_text()) if evaluation_path.is_file() else None
+    return {'release': provenance['release'], 'metrics': provenance['metrics'],
+            'dataset': provenance['provenance']['dataset'], 'artifact_sha256': provenance['artifact']['sha256'],
+            'runtime': health(), 'score_type': 'uncalibrated_model_scores',
+            'reliability_evaluation': evaluation,
+            'limitations': ['English Reddit headlines; not validated for full articles or other languages.',
+                            'Dataset labels do not establish factual truth.',
+                            'No evaluated paired image release is bundled.',
+                            'Calibration experiments do not change the production model.']}
 
 
 
@@ -157,8 +178,8 @@ async def detect_news(payload: DetectionInput, request: Request):
                  "note": "No trained model prediction could be produced."}
     config = verification.configuration()
     identity = request.client.host if request.client else 'unknown'
-    if config['available'] and not research_limit.allow(identity):
-        evidence = verification.unavailable('rate_limited')
+    if config['available'] and not await run_in_threadpool(research_limit.allow, identity):
+        evidence = verification.unavailable(research_limit.failure_reason)
     else:
         evidence = await verification.verify(text, payload.source_url, payload.publication_date)
     return {"mode": "news_detection", "model_assessment": model, "verification": evidence,

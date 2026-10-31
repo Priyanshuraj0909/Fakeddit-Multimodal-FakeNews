@@ -4,9 +4,13 @@
   "type": "module",
   "scripts": {
     "test": "node --test tests/frontend/*.test.js",
-    "check": "node --check frontend/src/pages/workspace.js && node --check frontend/src/services/api.js && node --check frontend/src/utils/media.js && node --check frontend/src/hooks/state.js && node --check frontend/src/components/detection-report.js"
+    "check": "node --check frontend/src/pages/workspace.js && node --check frontend/src/services/api.js && node --check frontend/src/utils/media.js && node --check frontend/src/hooks/state.js && node --check frontend/src/components/detection-report.js && node --check frontend/src/services/ocr.js && node --check frontend/src/services/history.js",
+    "test:browser": "node tests/browser/run.mjs"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "playwright": "1.58.2"
   }
 }

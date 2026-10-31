@@ -238,3 +238,15 @@ footer { display: flex; justify-content: space-between; align-items: center; gap
 .feature-signal { font-size: 12px; margin: 8px 0; }
 .assessment-section details { margin-top: 14px; font-size: 12px; }
 .assessment-section summary { cursor: pointer; }
+
+/* Review tools retain the workspace's existing type, spacing and color tokens. */
+.ocr-tools { padding: 14px 0 0; }
+.ocr-tools [role="status"], #history-status { font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.history-card { margin-top: 20px; }
+.history-body { padding: 0 24px 24px; }
+.history-body label { display: block; margin: 12px 0 8px; font-size: 12px; }
+.history-body select { width: 100%; max-width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid var(--line); border-radius: 8px; color: inherit; background: var(--surface); }
+.history-entry { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.history-open { flex: 1; text-align: left; overflow-wrap: anywhere; min-width: 0; }
+#history-list { font-size: 12px; line-height: 1.7; }
+.source-excerpt { margin: 10px 0; padding-left: 12px; border-left: 2px solid var(--line); font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; }

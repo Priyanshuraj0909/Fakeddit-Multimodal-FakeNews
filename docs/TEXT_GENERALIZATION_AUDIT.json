@@ -1,0 +1,103 @@
+{
+  "evaluated_at": "2026-10-31T09:21:25.213800+00:00",
+  "splits": {
+    "train": {
+      "prepared_sha256": "5b6df058d2e3523050c8cc1948e1fd6a87dc10ab28c717fee79cac49b2a6885d",
+      "raw_sha256": "9894cb4aa2f901c6f29b61ac3d95ce9f7e78c43be8062ae5deb1c219c82497bb",
+      "rows": 150000
+    },
+    "validation": {
+      "prepared_sha256": "f2535acc279443d4cb772a27ef02b35b0fdd8885fbd4ae474bf9f64ef894f163",
+      "raw_sha256": "c70140ec376e083e3780b5b488c96c8933678ca5800139bfb78c92e95df6946e",
+      "rows": 15000
+    },
+    "test": {
+      "prepared_sha256": "5776044d0353f4f36fde7f53ab2edd2be662a9fe9e6a7d6fcf2ec5e4186b630c",
+      "raw_sha256": "bc92378e070ca7b1a7497053d1c34cdc3f550be6232a76791a2c722d6d9bbf94",
+      "rows": 15000
+    }
+  },
+  "group_overlap": {
+    "author": {
+      "validation": {
+        "known_group_rows": 14230,
+        "seen_in_train_rows": 6909,
+        "fraction_of_known": 0.485523541813071
+      },
+      "test": {
+        "known_group_rows": 14211,
+        "seen_in_train_rows": 6847,
+        "fraction_of_known": 0.4818098655970727
+      }
+    },
+    "domain": {
+      "validation": {
+        "known_group_rows": 11678,
+        "seen_in_train_rows": 11323,
+        "fraction_of_known": 0.9696009590683337
+      },
+      "test": {
+        "known_group_rows": 11687,
+        "seen_in_train_rows": 11324,
+        "fraction_of_known": 0.968939847694019
+      }
+    },
+    "subreddit": {
+      "validation": {
+        "known_group_rows": 15000,
+        "seen_in_train_rows": 15000,
+        "fraction_of_known": 1.0
+      },
+      "test": {
+        "known_group_rows": 15000,
+        "seen_in_train_rows": 15000,
+        "fraction_of_known": 1.0
+      }
+    }
+  },
+  "metadata_shortcut_baselines": {
+    "domain": {
+      "test_accuracy": 0.726,
+      "test_macro_f1": 0.7239901576636271
+    },
+    "subreddit": {
+      "test_accuracy": 1.0,
+      "test_macro_f1": 1.0
+    }
+  },
+  "time_ranges": {
+    "train": {
+      "minimum": "2008-08-25T19:28:09+00:00",
+      "maximum": "2019-10-23T13:48:22+00:00",
+      "missing": 0
+    },
+    "validation": {
+      "minimum": "2010-06-20T00:51:49+00:00",
+      "maximum": "2019-10-23T01:07:58+00:00",
+      "missing": 0
+    },
+    "test": {
+      "minimum": "2008-07-18T14:23:47+00:00",
+      "maximum": "2019-10-23T00:45:59+00:00",
+      "missing": 0
+    }
+  },
+  "lexical_near_duplicate_candidates": {
+    "validation": {
+      "eligible_query_rows": 11012,
+      "candidate_overlap_rows": 0,
+      "fraction": 0.0
+    },
+    "test": {
+      "eligible_query_rows": 10969,
+      "candidate_overlap_rows": 3,
+      "fraction": 0.00027349803993071385
+    }
+  },
+  "limitations": [
+    "Observational audit; existing official splits are preserved.",
+    "SimHash uses word/unigram-bigram sets, 64 bits, Hamming distance <=3, minimum five tokens. Candidates need human review; this is not semantic deduplication.",
+    "Group overlap is not a source/author-disjoint benchmark; no such performance is claimed.",
+    "Metadata-majority baselines are fitted on training only; metadata is not used by the deployed classifier."
+  ]
+}

@@ -25,3 +25,12 @@
 ## 2026-10-04 — Existing engineering work
 
 Optional paired inference, local encoder extraction, model contracts, upload validation and regression tests were present in the working tree before restructuring. See docs/REPAIR_REPORT.md for that implementation record.
+
+## 2026-10-31 — review workflow and evaluation records
+
+- Added browser-local screenshot OCR with editable extraction and exported TSV word locations.
+- Added explicit browser report saving, independent human reviews and deletion.
+- Exposed short source excerpts, retrieval times, model card and request IDs/timing logs.
+- Added optional shared Redis quotas and offline MLflow hooks; neither service is automatically provisioned.
+- Recorded real text reliability and generalization audits, with source-label shortcut limitations.
+- Added human-review evaluation tooling and desktop/mobile browser runner. Paired release, learned consistency and independent evidence quality evaluation remain pending.

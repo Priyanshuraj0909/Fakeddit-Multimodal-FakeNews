@@ -1,6 +1,6 @@
 # Implementation plan
 
-Updated 2026-10-05. Engineering availability is separate from real-model readiness.
+Updated 2026-10-31. Engineering availability is separate from real-model readiness.
 
 | Phase | Status | Guide |
 | --- | --- | --- |
@@ -11,9 +11,9 @@ Updated 2026-10-05. Engineering availability is separate from real-model readine
 | 04 Image model | Encoder adapter implemented; standalone evaluation pending | [Details](docs/phases/PHASE_04_IMAGE_MODEL.md) |
 | 05 Multimodal | Pipeline implemented; real training pending | [Details](docs/phases/PHASE_05_MULTIMODAL.md) |
 | 06 Backend | Text detector and Groq verification implemented | [Details](docs/phases/PHASE_06_BACKEND.md) |
-| 07 Frontend | Detector and evidence reports implemented | [Details](docs/phases/PHASE_07_FRONTEND.md) |
+| 07 Frontend | Detector, editable OCR and optional local history implemented | [Details](docs/phases/PHASE_07_FRONTEND.md) |
 | 08 Explainability | Text contributions implemented; image attribution pending | [Details](docs/phases/PHASE_08_EXPLAINABILITY.md) |
 | 09 Testing | Automated suites implemented | [Details](docs/phases/PHASE_09_TESTING.md) |
 | 10 Deployment | Configuration implemented; release verification pending | [Details](docs/phases/PHASE_10_DEPLOYMENT.md) |
 
-Next: activate and verify Groq credentials, train real image/text fusion, evaluate domain shift and calibrate scores. Text-v1 has real subset evaluation recorded in docs/TEXT_MODEL_RELEASE.json.
+Next: obtain paired images/local CLIP assets for real fusion and consistency evaluation; collect independent human-reviewed evidence assessments; evaluate source/temporal domain shift. Calibration and observational generalization audits are recorded, while production uses the original scores. Text-v1 has real subset evaluation recorded in docs/TEXT_MODEL_RELEASE.json.

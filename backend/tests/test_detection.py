@@ -74,6 +74,7 @@ def test_partial_article_evidence_cannot_confirm_whole_article():
         {'statement': 'Unresolved claim', 'verdict': 'insufficient_evidence', 'explanation': 'Missing', 'evidence_ids': []}]}, sources)
     assert result['verdict'] == 'insufficient_evidence'
     assert 'content' not in result['sources'][0]
+    assert result['sources'][0]['excerpt'] == 'Evidence'
 
 
 def test_groq_search_then_structured_assessment(monkeypatch):
@@ -114,3 +115,45 @@ def test_bounded_research_rate_limit():
     assert not limit.allow('a')
     assert limit.allow('b') and limit.allow('c')
     assert len(limit.entries) == 2
+
+
+def test_shared_quota_fails_closed_without_exposing_redis_credentials(monkeypatch):
+    monkeypatch.setenv('FAKEDDIT_REDIS_URL', 'redis://secret:password@invalid.local')
+    limit = ResearchLimit()
+    class BrokenRedis:
+        def eval(self, *args):
+            raise RuntimeError('Redis unavailable')
+    limit.redis = BrokenRedis()
+    assert limit.allow('caller') is False
+
+
+def test_model_card_and_request_ids_expose_release_facts():
+    response = client.get('/api/model-card')
+    assert response.status_code == 200
+    assert len(response.headers['x-request-id']) == 32
+    assert response.json()['release'] == 'text-v1'
+    assert response.json()['metrics']['rows']['test'] == 15000
+
+
+def test_model_card_missing_provenance_is_explicitly_unavailable(monkeypatch, tmp_path):
+    monkeypatch.setattr('backend.app.main.ROOT', tmp_path)
+    response = client.get('/api/model-card')
+    assert response.status_code == 503
+    assert 'provenance is unavailable' in response.json()['detail']
+
+
+def test_shared_quota_uses_atomic_expiring_keys_and_preserves_denial_reason(monkeypatch):
+    monkeypatch.setenv('FAKEDDIT_REDIS_URL', 'redis://unused')
+    limit = ResearchLimit(maximum=1, window=60)
+    calls = []
+    class SharedRedis:
+        def eval(self, script, keys, key, window):
+            calls.append((script, keys, key, window))
+            return len(calls)
+    limit.redis = SharedRedis()
+    assert limit.allow('private-client-identity')
+    assert not limit.allow('private-client-identity')
+    assert calls[0][2] == calls[1][2]
+    assert 'private-client-identity' not in calls[0][2]
+    assert "'EXPIRE'" in calls[0][0] and calls[0][3] == 60
+    assert limit.failure_reason == 'shared_quota_denied'

@@ -1,0 +1,529 @@
+{
+  "evaluated_at": "2026-10-31T09:19:27.732313+00:00",
+  "model_sha256": "e8b2ae2ad0dec6790c97a09faa35f648fb5d887946822e335bd24b82bfb402c4",
+  "splits": {
+    "train": {
+      "rows": 150000,
+      "sha256": "5b6df058d2e3523050c8cc1948e1fd6a87dc10ab28c717fee79cac49b2a6885d"
+    },
+    "validation": {
+      "rows": 15000,
+      "sha256": "f2535acc279443d4cb772a27ef02b35b0fdd8885fbd4ae474bf9f64ef894f163"
+    },
+    "test": {
+      "rows": 15000,
+      "sha256": "5776044d0353f4f36fde7f53ab2edd2be662a9fe9e6a7d6fcf2ec5e4186b630c"
+    }
+  },
+  "protocol": "Base model frozen. Sigmoid fitted on 7,500 stratified validation rows; raw/sigmoid selected by Brier score on the other 7,500. Test is evaluation only. No production model changed.",
+  "seed": 42,
+  "calibration_fit_rows": 7500,
+  "calibration_selection_rows": 7500,
+  "selected": "sigmoid",
+  "selection": {
+    "raw": {
+      "brier_score": 0.13772182147658696,
+      "log_loss": 0.4334857936116521,
+      "ece_10_equal_width_bins": 0.03621509933295133,
+      "reliability_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "count": 1085,
+          "mean_score": 0.056360173070845156,
+          "fraction_real": 0.029493087557603687
+        },
+        {
+          "lower": 0.1,
+          "upper": 0.2,
+          "count": 1244,
+          "mean_score": 0.1516565705772439,
+          "fraction_real": 0.09807073954983923
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.3,
+          "count": 763,
+          "mean_score": 0.2486606417042458,
+          "fraction_real": 0.2018348623853211
+        },
+        {
+          "lower": 0.3,
+          "upper": 0.4,
+          "count": 651,
+          "mean_score": 0.3485482860949156,
+          "fraction_real": 0.35023041474654376
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.5,
+          "count": 552,
+          "mean_score": 0.4481071016470892,
+          "fraction_real": 0.4692028985507246
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "count": 587,
+          "mean_score": 0.5505648825957634,
+          "fraction_real": 0.5570698466780238
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "count": 614,
+          "mean_score": 0.6520235669451634,
+          "fraction_real": 0.7280130293159609
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "count": 684,
+          "mean_score": 0.751519608341896,
+          "fraction_real": 0.8114035087719298
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "count": 776,
+          "mean_score": 0.8519839570364194,
+          "fraction_real": 0.8981958762886598
+        },
+        {
+          "lower": 0.9,
+          "upper": 1.0,
+          "count": 544,
+          "mean_score": 0.9394056748308495,
+          "fraction_real": 0.9393382352941176
+        }
+      ],
+      "selective_classification": [
+        {
+          "threshold": 0.5,
+          "accepted": 7500,
+          "coverage": 1.0,
+          "accuracy": 0.8049333333333333
+        },
+        {
+          "threshold": 0.6,
+          "accepted": 6361,
+          "coverage": 0.8481333333333333,
+          "accuracy": 0.8515956610595818
+        },
+        {
+          "threshold": 0.65,
+          "accepted": 5763,
+          "coverage": 0.7684,
+          "accuracy": 0.8722887385042513
+        },
+        {
+          "threshold": 0.7,
+          "accepted": 5096,
+          "coverage": 0.6794666666666667,
+          "accuracy": 0.8922684458398744
+        },
+        {
+          "threshold": 0.8,
+          "accepted": 3649,
+          "coverage": 0.4865333333333333,
+          "accuracy": 0.92710331597698
+        },
+        {
+          "threshold": 0.9,
+          "accepted": 1629,
+          "coverage": 0.2172,
+          "accuracy": 0.960098219766728
+        },
+        {
+          "threshold": 0.95,
+          "accepted": 623,
+          "coverage": 0.08306666666666666,
+          "accuracy": 0.9775280898876404
+        }
+      ],
+      "usable": 7500,
+      "rows": 7500
+    },
+    "sigmoid": {
+      "brier_score": 0.13620239630040032,
+      "log_loss": 0.4287539023235922,
+      "ece_10_equal_width_bins": 0.016850025885635857,
+      "reliability_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "count": 1617,
+          "mean_score": 0.04595923678183891,
+          "fraction_real": 0.05256648113790971
+        },
+        {
+          "lower": 0.1,
+          "upper": 0.2,
+          "count": 1097,
+          "mean_score": 0.14057719257284038,
+          "fraction_real": 0.1203281677301732
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.3,
+          "count": 638,
+          "mean_score": 0.24913794297733904,
+          "fraction_real": 0.25235109717868337
+        },
+        {
+          "lower": 0.3,
+          "upper": 0.4,
+          "count": 500,
+          "mean_score": 0.3487612606628223,
+          "fraction_real": 0.412
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.5,
+          "count": 443,
+          "mean_score": 0.44778054395392375,
+          "fraction_real": 0.4762979683972912
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "count": 460,
+          "mean_score": 0.5507945785530399,
+          "fraction_real": 0.5478260869565217
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "count": 481,
+          "mean_score": 0.6493896818706119,
+          "fraction_real": 0.683991683991684
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "count": 578,
+          "mean_score": 0.7495512989229827,
+          "fraction_real": 0.7612456747404844
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "count": 737,
+          "mean_score": 0.8510361067090845,
+          "fraction_real": 0.858887381275441
+        },
+        {
+          "lower": 0.9,
+          "upper": 1.0,
+          "count": 949,
+          "mean_score": 0.9479670294584651,
+          "fraction_real": 0.9304531085353003
+        }
+      ],
+      "selective_classification": [
+        {
+          "threshold": 0.5,
+          "accepted": 7500,
+          "coverage": 1.0,
+          "accuracy": 0.8049333333333333
+        },
+        {
+          "threshold": 0.6,
+          "accepted": 6597,
+          "coverage": 0.8796,
+          "accuracy": 0.8417462482946794
+        },
+        {
+          "threshold": 0.65,
+          "accepted": 6108,
+          "coverage": 0.8144,
+          "accuracy": 0.8592010478061559
+        },
+        {
+          "threshold": 0.7,
+          "accepted": 5616,
+          "coverage": 0.7488,
+          "accuracy": 0.8778490028490028
+        },
+        {
+          "threshold": 0.8,
+          "accepted": 4400,
+          "coverage": 0.5866666666666667,
+          "accuracy": 0.9120454545454545
+        },
+        {
+          "threshold": 0.9,
+          "accepted": 2566,
+          "coverage": 0.34213333333333334,
+          "accuracy": 0.941153546375682
+        },
+        {
+          "threshold": 0.95,
+          "accepted": 1372,
+          "coverage": 0.18293333333333334,
+          "accuracy": 0.9628279883381924
+        }
+      ],
+      "usable": 7500,
+      "rows": 7500
+    }
+  },
+  "sigmoid": {
+    "coefficient": 1.256372954778668,
+    "intercept": 0.0033547836101878448
+  },
+  "test": {
+    "raw": {
+      "brier_score": 0.13850606344620067,
+      "log_loss": 0.43565927187630443,
+      "ece_10_equal_width_bins": 0.041849732099722856,
+      "reliability_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "count": 2164,
+          "mean_score": 0.05509061621007255,
+          "fraction_real": 0.032809611829944546
+        },
+        {
+          "lower": 0.1,
+          "upper": 0.2,
+          "count": 2401,
+          "mean_score": 0.15081143206179326,
+          "fraction_real": 0.09454394002498959
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.3,
+          "count": 1597,
+          "mean_score": 0.24727129610755114,
+          "fraction_real": 0.21039448966812774
+        },
+        {
+          "lower": 0.3,
+          "upper": 0.4,
+          "count": 1351,
+          "mean_score": 0.34891100043589135,
+          "fraction_real": 0.3316062176165803
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.5,
+          "count": 1145,
+          "mean_score": 0.44965955687223713,
+          "fraction_real": 0.48034934497816595
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "count": 1182,
+          "mean_score": 0.5506459547074705,
+          "fraction_real": 0.6175972927241963
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "count": 1194,
+          "mean_score": 0.6493939577038229,
+          "fraction_real": 0.7185929648241206
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "count": 1347,
+          "mean_score": 0.751980411656186,
+          "fraction_real": 0.8121752041573868
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "count": 1544,
+          "mean_score": 0.8495705759367723,
+          "fraction_real": 0.8989637305699482
+        },
+        {
+          "lower": 0.9,
+          "upper": 1.0,
+          "count": 1075,
+          "mean_score": 0.9385258590630671,
+          "fraction_real": 0.9311627906976744
+        }
+      ],
+      "selective_classification": [
+        {
+          "threshold": 0.5,
+          "accepted": 13535,
+          "coverage": 0.9023333333333333,
+          "accuracy": 0.8023642408570373
+        },
+        {
+          "threshold": 0.6,
+          "accepted": 11339,
+          "coverage": 0.7559333333333333,
+          "accuracy": 0.8468118881735602
+        },
+        {
+          "threshold": 0.65,
+          "accepted": 10186,
+          "coverage": 0.6790666666666667,
+          "accuracy": 0.8658943648144513
+        },
+        {
+          "threshold": 0.7,
+          "accepted": 8968,
+          "coverage": 0.5978666666666667,
+          "accuracy": 0.8865967885816235
+        },
+        {
+          "threshold": 0.8,
+          "accepted": 6257,
+          "coverage": 0.41713333333333336,
+          "accuracy": 0.9242448457727346
+        },
+        {
+          "threshold": 0.9,
+          "accepted": 2993,
+          "coverage": 0.19953333333333334,
+          "accuracy": 0.9552288673571667
+        },
+        {
+          "threshold": 0.95,
+          "accepted": 1173,
+          "coverage": 0.0782,
+          "accuracy": 0.969309462915601
+        }
+      ],
+      "usable": 13535,
+      "rows": 15000
+    },
+    "sigmoid": {
+      "brier_score": 0.13688283046016417,
+      "log_loss": 0.43097351220855173,
+      "ece_10_equal_width_bins": 0.01967669700618721,
+      "reliability_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "count": 3218,
+          "mean_score": 0.04537134275224251,
+          "fraction_real": 0.045059042883778745
+        },
+        {
+          "lower": 0.1,
+          "upper": 0.2,
+          "count": 2174,
+          "mean_score": 0.14176729249927403,
+          "fraction_real": 0.13017479300827967
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.3,
+          "count": 1299,
+          "mean_score": 0.2475896700216746,
+          "fraction_real": 0.27867590454195534
+        },
+        {
+          "lower": 0.3,
+          "upper": 0.4,
+          "count": 1057,
+          "mean_score": 0.34965613872955764,
+          "fraction_real": 0.36423841059602646
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.5,
+          "count": 902,
+          "mean_score": 0.45007866958180176,
+          "fraction_real": 0.5022172949002217
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "count": 955,
+          "mean_score": 0.5516751647861309,
+          "fraction_real": 0.6094240837696335
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "count": 984,
+          "mean_score": 0.6510805026750135,
+          "fraction_real": 0.693089430894309
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "count": 1069,
+          "mean_score": 0.751352635072508,
+          "fraction_real": 0.7483629560336763
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "count": 1528,
+          "mean_score": 0.852489244334935,
+          "fraction_real": 0.8704188481675392
+        },
+        {
+          "lower": 0.9,
+          "upper": 1.0,
+          "count": 1814,
+          "mean_score": 0.9482031177701162,
+          "fraction_real": 0.9266813671444322
+        }
+      ],
+      "selective_classification": [
+        {
+          "threshold": 0.5,
+          "accepted": 13535,
+          "coverage": 0.9023333333333333,
+          "accuracy": 0.8023642408570373
+        },
+        {
+          "threshold": 0.6,
+          "accepted": 11777,
+          "coverage": 0.7851333333333333,
+          "accuracy": 0.8391780589284198
+        },
+        {
+          "threshold": 0.65,
+          "accepted": 10830,
+          "coverage": 0.722,
+          "accuracy": 0.8564173591874423
+        },
+        {
+          "threshold": 0.7,
+          "accepted": 9874,
+          "coverage": 0.6582666666666667,
+          "accuracy": 0.8714806562689893
+        },
+        {
+          "threshold": 0.8,
+          "accepted": 7678,
+          "coverage": 0.5118666666666667,
+          "accuracy": 0.9106538160979422
+        },
+        {
+          "threshold": 0.9,
+          "accepted": 4632,
+          "coverage": 0.3088,
+          "accuracy": 0.9455958549222798
+        },
+        {
+          "threshold": 0.95,
+          "accepted": 2535,
+          "coverage": 0.169,
+          "accuracy": 0.9570019723865878
+        }
+      ],
+      "usable": 13535,
+      "rows": 15000
+    }
+  },
+  "limitations": [
+    "Same held-out benchmark used for the recorded text-v1 release; not new external generalization evidence.",
+    "Calibration concerns dataset labels, not factual truth.",
+    "Production continues to use raw model scores and the existing 0.65 heuristic.",
+    "No near-duplicate, author-disjoint or temporal audit is implied."
+  ]
+}

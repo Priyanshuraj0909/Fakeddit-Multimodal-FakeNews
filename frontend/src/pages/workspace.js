@@ -2,6 +2,8 @@ import { renderDetection } from '../components/detection-report.js';
 import { requestJSON, validateAnalysis } from '../services/api.js';
 import { prepareMedia, readTextFile, formatSize, MEDIA_EXTENSIONS } from '../utils/media.js';
 import { createStore, buildReport, inspectMedia } from '../hooks/state.js';
+import { extractImageText } from '../services/ocr.js';
+import { readHistory, saveReport, deleteReport, clearHistory } from '../services/history.js';
 
 const byId = id => document.getElementById(id);
 const store = createStore();
@@ -15,6 +17,9 @@ let inferenceImageLimit = 10 * 1024 * 1024;
 let textImportVersion = 0;
 let analysisController = null;
 let renderedReport = null;
+let ocrController = null;
+let ocrResult = null;
+let activeHistoryId = null;
 const renderedMedia = { image: null, video: null };
 
 function message(id, text) {
@@ -30,6 +35,8 @@ function invalidateReport() {
 }
 
 function setText(text) {
+  ocrResult = null;
+  textImportVersion += 1;
   invalidateReport();
   byId('headline').value = text;
   store.update({ text });
@@ -119,6 +126,8 @@ store.subscribe(state => {
   byId('evidence-detail').textContent = sourceCount ? (hasText ? 'Text analysis with media alongside for context.' : 'Create a local media report or add text for language analysis.') : 'Add images or video for context.';
   byId('evidence-count').textContent = `${sourceCount} ${sourceCount === 1 ? 'source' : 'sources'}`;
   const loading = state.status === 'loading';
+  byId('extract-text').disabled = !state.media.image?.file || Boolean(ocrController) || uploads.has('image');
+  byId('save-report').disabled = !state.report || state.report.mode === 'media_inspection' || loading;
   byId('submit').disabled = loading || uploads.size > 0;
   byId('submit-label').textContent = loading ? (state.mode === 'detect' ? 'Checking news…' : 'Analyzing…') : hasText ? (state.mode === 'detect' ? 'Detect & verify news' : 'Analyze text') : sourceCount ? 'Inspect media' : state.mode === 'detect' ? 'Detect & verify news' : 'Analyze text';
   byId('report-card').setAttribute('aria-busy', String(loading));
@@ -182,6 +191,7 @@ byId('text-file').addEventListener('change', async event => {
 });
 
 async function attachMedia(kind, files) {
+  if (kind === 'image') { ocrController?.abort(); ocrResult = null; }
   if (files.length !== 1) { store.update({ uploadError: 'Choose one file at a time for each media type.', uploadStatus: '' }); return; }
   uploadControllers.get(kind)?.abort();
   const controller = new AbortController();
@@ -207,6 +217,7 @@ async function attachMedia(kind, files) {
 }
 
 function removeMedia(kind) {
+  if (kind === 'image') { ocrController?.abort(); ocrResult = null; }
   uploadControllers.get(kind)?.abort();
   uploadControllers.delete(kind); uploads.delete(kind);
   const previous = store.get().media[kind];
@@ -237,6 +248,8 @@ window.addEventListener('dragover', event => { if (Array.from(event.dataTransfer
 window.addEventListener('drop', event => { if (Array.from(event.dataTransfer.types).includes('Files')) event.preventDefault(); });
 
 byId('reset').addEventListener('click', () => {
+  activeHistoryId = null;
+  byId('review').value = '';
   textImportVersion += 1;
   removeMedia('image'); removeMedia('video');
   setText('');
@@ -273,7 +286,13 @@ byId('analysis-form').addEventListener('submit', async event => {
   store.update({ status: 'loading', report: null, error: '' });
   try {
     const data = await requestJSON(state.mode === 'multimodal' ? '/api/predict/multimodal' : `/api/${state.mode}`, { text: state.text, ...(state.mode === 'detect' ? { source_url: state.context.source_url, publication_date: state.context.publication_date, timeout: 65000 } : {}), ...(state.mode === 'multimodal' ? { image: state.media.image.file, timeout: 60000 } : {}), signal: controller.signal });
-    if (!controller.signal.aborted) store.update({ status: 'ready', report: buildReport(validateAnalysis(data), state) });
+    if (!controller.signal.aborted) {
+      activeHistoryId = null;
+      byId('review').value = '';
+      const report = buildReport(validateAnalysis(data), state);
+      if (ocrResult) report.text_extraction = { ...ocrResult, submitted_text: state.text, edited: ocrResult.text !== state.text, note: 'OCR extraction only; text must be reviewed. Confidence is recognition quality, not factual certainty.' };
+      store.update({ status: 'ready', report });
+    }
   } catch (error) {
     if (!controller.signal.aborted && error.name !== 'AbortError') store.update({ status: 'error', error: error.message });
   } finally { if (analysisController === controller) analysisController = null; }
@@ -325,6 +344,7 @@ requestJSON('/api/capabilities', { timeout: 10000 }).then(capabilities => {
 });
 
 window.addEventListener('pagehide', () => {
+  ocrController?.abort();
   textImportVersion += 1;
   analysisController?.abort();
   uploadControllers.forEach(controller => controller.abort());
@@ -333,3 +353,75 @@ window.addEventListener('pagehide', () => {
   uploads.clear(); uploadControllers.clear();
   store.update({ media: { image: null, video: null }, status: 'idle', report: null, uploadStatus: '' });
 });
+
+byId('extract-text').addEventListener('click', async () => {
+  const media = store.get().media.image;
+  if (!media?.file || ocrController) return;
+  const version = textImportVersion;
+  const controller = new AbortController();
+  ocrController = controller;
+  byId('cancel-ocr').hidden = false;
+  store.update({});
+  message('ocr-status', 'Downloading OCR engine…');
+  try {
+    const result = await extractImageText(media.file, { signal: controller.signal,
+      onProgress: (status, progress) => message('ocr-status', `${status} ${Number.isFinite(progress) ? Math.round(progress * 100) + '%' : ''}`) });
+    if (controller.signal.aborted || store.get().media.image !== media) return;
+    if (version !== textImportVersion) { message('ocr-status', 'Text changed during extraction. Your edits were kept; retry extraction to replace them.'); return; }
+    setText(result.text);
+    ocrResult = result;
+    store.update({ tab: 'text', uploadStatus: 'Screenshot text extracted. Review and correct it before submitting.' });
+    message('ocr-status', 'Text extracted. Review it in the Text tab.');
+    byId('headline').focus();
+  } catch (error) {
+    message('ocr-status', error.name === 'AbortError' ? 'Text extraction cancelled.' : error.message);
+  } finally {
+    if (ocrController === controller) ocrController = null;
+    byId('cancel-ocr').hidden = true;
+    store.update({});
+  }
+});
+byId('cancel-ocr').addEventListener('click', () => ocrController?.abort());
+
+function refreshHistory() {
+  const list = byId('history-list');
+  list.replaceChildren();
+  try {
+    const entries = readHistory(localStorage);
+    for (const entry of entries) {
+      const row = document.createElement('div'); row.className = 'history-entry';
+      const open = document.createElement('button'); open.type = 'button'; open.className = 'text-button history-open';
+      const model = entry.report.model_assessment || entry.report;
+      open.textContent = `${new Date(entry.report.generated_at).toLocaleString()} · ${model.assessed_text || model.label || 'Text assessment'}${entry.review ? ' · ' + entry.review.replaceAll('_', ' ') : ''}`;
+      open.addEventListener('click', () => {
+        invalidateReport();
+        activeHistoryId = entry.id;
+        byId('review').value = entry.review;
+        store.update({ status: 'ready', report: entry.report });
+        byId('report-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'text-button'; remove.textContent = 'Delete';
+      remove.setAttribute('aria-label', `Delete assessment from ${new Date(entry.report.generated_at).toLocaleString()}`);
+      remove.addEventListener('click', () => {
+        try { deleteReport(localStorage, entry.id); refreshHistory(); message('history-status', 'Assessment deleted.'); }
+        catch { message('history-status', 'Browser storage is unavailable.'); }
+      });
+      row.append(open, remove); list.append(row);
+    }
+    if (!entries.length) list.textContent = 'No saved assessments yet.';
+  } catch (error) { message('history-status', error.message || 'Browser storage is unavailable.'); }
+}
+byId('save-report').addEventListener('click', () => {
+  try {
+    const report = store.get().report;
+    const id = activeHistoryId || crypto.randomUUID();
+    saveReport(localStorage, report, byId('review').value, id);
+    activeHistoryId = id;
+    refreshHistory(); message('history-status', 'Assessment saved on this device. Your review is not used for training.');
+  } catch (error) { message('history-status', error.message || 'Browser storage is unavailable.'); }
+});
+byId('clear-history').addEventListener('click', () => {
+  try { clearHistory(localStorage); activeHistoryId = null; refreshHistory(); message('history-status', 'Saved assessments cleared.'); }
+  catch { message('history-status', 'Browser storage is unavailable.'); }
+});
+refreshHistory();
