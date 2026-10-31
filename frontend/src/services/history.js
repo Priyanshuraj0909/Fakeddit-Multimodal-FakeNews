@@ -11,6 +11,11 @@ function valid(entry) {
     const report = entry.report;
     if (!report.context || typeof report.context !== 'object' || !report.attachments || typeof report.attachments !== 'object') return false;
     if (report.mode === 'media_inspection') return false;
+    if (report.submission && (typeof report.submission.text !== 'string' || report.submission.text.length > 10000
+        || !['detect', 'analyze', 'predict', 'multimodal'].includes(report.submission.mode))) return false;
+    for (const key of ['source_url', 'publication_date', 'verification_notes']) {
+      if (report.context[key] !== undefined && (typeof report.context[key] !== 'string' || report.context[key].length > 10000)) return false;
+    }
     validateAnalysis(report);
     return true;
   } catch { return false; }
@@ -37,3 +42,10 @@ export function saveReport(storage, report, review = '', id = crypto.randomUUID(
 
 export function deleteReport(storage, id) { storage.setItem(KEY, JSON.stringify(readHistory(storage).filter(item => item.id !== id))); }
 export function clearHistory(storage) { storage.removeItem(KEY); }
+
+export function restoreReport(report) {
+  const mode = report.submission?.mode || (report.mode === 'news_detection' ? 'detect' : report.mode === 'descriptive' ? 'analyze' : report.mode === 'trained_multimodal' ? 'multimodal' : 'predict');
+  return { text: report.submission?.text ?? report.model_assessment?.assessed_text ?? '', mode,
+    context: { source_url: '', publication_date: '', verification_notes: '', ...report.context },
+    complete: Boolean(report.submission) };
+}

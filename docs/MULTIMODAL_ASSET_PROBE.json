@@ -1,0 +1,28 @@
+{
+  "checked_at": "2026-10-31T09:44:12.083898+00:00",
+  "probe": "First three image URLs in official local training metadata; no checkpoint downloaded or model trained",
+  "results": [
+    {
+      "id": "awxhir",
+      "http_status": 200,
+      "content_type": "image/jpeg",
+      "sample_bytes": 1024
+    },
+    {
+      "id": "98pbid",
+      "status": "unavailable",
+      "http_status": 404,
+      "error_type": "HTTPError"
+    },
+    {
+      "id": "6f2cy5",
+      "http_status": 200,
+      "content_type": "image/jpeg",
+      "sample_bytes": 1024
+    }
+  ],
+  "limitations": [
+    "Small availability probe; cannot establish availability of the full image corpus.",
+    "No image labels, model metrics or image-headline consistency are inferred."
+  ]
+}

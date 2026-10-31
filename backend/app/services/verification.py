@@ -39,7 +39,7 @@ def unavailable(reason='missing_api_key'):
         'missing_api_key': 'Live verification is not configured. The project owner must add GROQ_API_KEY to the server environment.',
         'provider_error': 'Groq could not complete source verification. Retry later; this is not evidence that the claim is true or false.',
         'timeout': 'Source verification timed out. Retry with one specific claim.',
-        'rate_limited': 'The verification request limit was reached. Wait a minute and retry.',
+        'rate_limited': 'A client or total verification request budget was reached. Retry later.',
         'shared_quota_denied': 'The shared verification quota was reached or its service is unavailable. Retry later.',
     }
     return {'status': 'unavailable', 'reason': reason, 'verdict': 'not_checked',

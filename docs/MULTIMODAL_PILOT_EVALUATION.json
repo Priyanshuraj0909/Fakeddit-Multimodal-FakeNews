@@ -1,0 +1,879 @@
+{
+  "evaluated_at": "2026-10-31T09:53:51.162776+00:00",
+  "status": "exploratory_pilot",
+  "production_model_changed": false,
+  "acquisition": {
+    "prepared_at": "2026-10-31T09:49:49.298496+00:00",
+    "seed": 42,
+    "splits": {
+      "train": {
+        "rows": 600,
+        "prepared_sha256": "5b6df058d2e3523050c8cc1948e1fd6a87dc10ab28c717fee79cac49b2a6885d",
+        "raw_sha256": "9894cb4aa2f901c6f29b61ac3d95ce9f7e78c43be8062ae5deb1c219c82497bb",
+        "pilot_csv_sha256": "853bb88196430452fd8a30fe8225ff24621dcfe4b0cdcfc09ded63b62caa7cb0"
+      },
+      "validation": {
+        "rows": 200,
+        "prepared_sha256": "f2535acc279443d4cb772a27ef02b35b0fdd8885fbd4ae474bf9f64ef894f163",
+        "raw_sha256": "c70140ec376e083e3780b5b488c96c8933678ca5800139bfb78c92e95df6946e",
+        "pilot_csv_sha256": "ce1d561ffeca1233a79edb3b8436c2994d94701deb81d55bd46546bbca44f251"
+      },
+      "test": {
+        "rows": 200,
+        "prepared_sha256": "5776044d0353f4f36fde7f53ab2edd2be662a9fe9e6a7d6fcf2ec5e4186b630c",
+        "raw_sha256": "bc92378e070ca7b1a7497053d1c34cdc3f550be6232a76791a2c722d6d9bbf94",
+        "pilot_csv_sha256": "ed05d102e0d00d173dbe820068269fd0d1d37b8f83a667617746f57544558379"
+      }
+    },
+    "skipped": [
+      {
+        "split": "train",
+        "id": "bi9o77",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "1h76ok",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "b95wwy",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "bws9a6",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "95e5dj",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "8iz2rz",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "auta7p",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "d8pz09",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "8tpsuv",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "ca0snf",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "cloxzk",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "eoe1p1q",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "ch02hv",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "bh2e9i",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "54e4j1",
+        "reason": "ValueError",
+        "http_status": null
+      },
+      {
+        "split": "train",
+        "id": "8e0cl3",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "7v1wwu",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "axz80n",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "b1mwa2",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "8esrgc",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "c01hmt",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "asfsru",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "b5yhqi",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "9cuksj",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "cimexr",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "8ab526",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "13b33f",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "bgl4ru",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "8xzub4",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "5r3wjt",
+        "reason": "duplicate_image_sha256"
+      },
+      {
+        "split": "train",
+        "id": "dl4tdo",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "83tc9x",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "ci43x9",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "150h57",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "4mq5uu",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "cy168x",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "cr6quk",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "cmwrkr",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "c8j5j9",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "clny43",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "bby3qp",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "cddg3l",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "9ib260",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "ba1ktv",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "cmkke1",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "bjm8dy",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "ci1ntl",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "bwvxpd",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "b0ibui",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "cmciby",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "1w77ab",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "9d8gzi",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "3guwrj",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "601e5a",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "biqtuz",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "c9ybv0",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "train",
+        "id": "djqjg0",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "validation",
+        "id": "91n12a",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "validation",
+        "id": "bal4ej",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "validation",
+        "id": "5us5zp",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "validation",
+        "id": "5ylwxb",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "validation",
+        "id": "5zxxm0",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "validation",
+        "id": "6epmq7",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "validation",
+        "id": "8s9psg",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "validation",
+        "id": "beacbc",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "validation",
+        "id": "da3fmx",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "validation",
+        "id": "316oei",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "validation",
+        "id": "z55rb",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "validation",
+        "id": "dgkn67",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "test",
+        "id": "94d41c",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "test",
+        "id": "cg5654",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "test",
+        "id": "8jr4pr",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "test",
+        "id": "btgs0w",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "test",
+        "id": "1kopyb",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "test",
+        "id": "cbwavd",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "test",
+        "id": "bf6ehy",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "test",
+        "id": "c0hx51",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "test",
+        "id": "b8n9jd",
+        "reason": "HTTPError",
+        "http_status": 404
+      },
+      {
+        "split": "test",
+        "id": "6qkewm",
+        "reason": "HTTPError",
+        "http_status": 404
+      }
+    ],
+    "protocol": "Balanced small pilot, seeded candidate order within each existing official prepared split; first retrievable Reddit-hosted images; exact image hashes excluded across all splits.",
+    "limitations": [
+      "Availability and hosting selection bias; not representative of the full dataset.",
+      "No semantic or perceptual image deduplication is claimed.",
+      "Small balanced pilot metrics cannot be compared directly to text-v1 natural class proportions.",
+      "Images may contain watermarks, deletion notices or changed content; human inspection remains required."
+    ]
+  },
+  "manifest": {
+    "schema_version": 1,
+    "task": "fakeddit_binary",
+    "labels": {
+      "0": "Likely fake / misleading",
+      "1": "Likely real"
+    },
+    "label_source": "Official Fakeddit v2: 2_way_label 1 iff 6_way_label 0; see docs/TEXT_MODEL_RELEASE.json",
+    "encoder_sha256": "768d0bd6d2bb116f0cb9658e533580190ac9f4028e5b4b2fc738b5415df04ba3",
+    "preprocessing": {
+      "image": "exif_transpose_rgb_first_frame",
+      "text": "strip_clip_tokenize_truncate",
+      "normalization": "l2_per_modality",
+      "feature_order": [
+        "image",
+        "text"
+      ]
+    },
+    "encoder_packages": {
+      "torch": "2.15.0",
+      "transformers": "4.57.6"
+    },
+    "widths": {
+      "image": 512,
+      "text": 512
+    },
+    "model_sha256": "fa57375f29471b07eecf4faedfafa9623772cf8e7a437ca747a4b4cab0e9c752",
+    "packages": {
+      "xgboost": "3.4.1",
+      "numpy": "2.5.3",
+      "scikit-learn": "1.9.1"
+    }
+  },
+  "metrics": {
+    "accuracy": 0.725,
+    "macro_f1": 0.7246627118219819,
+    "classification_report": {
+      "0": {
+        "precision": 0.7419354838709677,
+        "recall": 0.69,
+        "f1-score": 0.7150259067357513,
+        "support": 100.0
+      },
+      "1": {
+        "precision": 0.7102803738317757,
+        "recall": 0.76,
+        "f1-score": 0.7342995169082126,
+        "support": 100.0
+      },
+      "accuracy": 0.725,
+      "macro avg": {
+        "precision": 0.7261079288513717,
+        "recall": 0.725,
+        "f1-score": 0.7246627118219819,
+        "support": 200.0
+      },
+      "weighted avg": {
+        "precision": 0.7261079288513715,
+        "recall": 0.725,
+        "f1-score": 0.7246627118219819,
+        "support": 200.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        69,
+        31
+      ],
+      [
+        24,
+        76
+      ]
+    ],
+    "best_iteration": 217,
+    "validation": {
+      "accuracy": 0.81,
+      "macro_f1": 0.8099239695878351,
+      "classification_report": {
+        "0": {
+          "precision": 0.8229166666666666,
+          "recall": 0.79,
+          "f1-score": 0.8061224489795918,
+          "support": 100.0
+        },
+        "1": {
+          "precision": 0.7980769230769231,
+          "recall": 0.83,
+          "f1-score": 0.8137254901960784,
+          "support": 100.0
+        },
+        "accuracy": 0.81,
+        "macro avg": {
+          "precision": 0.8104967948717949,
+          "recall": 0.81,
+          "f1-score": 0.8099239695878351,
+          "support": 200.0
+        },
+        "weighted avg": {
+          "precision": 0.8104967948717947,
+          "recall": 0.81,
+          "f1-score": 0.8099239695878352,
+          "support": 200.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          79,
+          21
+        ],
+        [
+          17,
+          83
+        ]
+      ]
+    },
+    "seed": 42,
+    "feature_count": 1024,
+    "rows": {
+      "train": 600,
+      "validation": 200,
+      "test": 200
+    },
+    "note": "Image/text features only; test data never used for early stopping. Scores are not calibrated truth probabilities.",
+    "ablations": {
+      "image_only": {
+        "accuracy": 0.625,
+        "macro_f1": 0.6247654784240151,
+        "classification_report": {
+          "0": {
+            "precision": 0.6190476190476191,
+            "recall": 0.65,
+            "f1-score": 0.6341463414634146,
+            "support": 100.0
+          },
+          "1": {
+            "precision": 0.631578947368421,
+            "recall": 0.6,
+            "f1-score": 0.6153846153846154,
+            "support": 100.0
+          },
+          "accuracy": 0.625,
+          "macro avg": {
+            "precision": 0.62531328320802,
+            "recall": 0.625,
+            "f1-score": 0.6247654784240151,
+            "support": 200.0
+          },
+          "weighted avg": {
+            "precision": 0.62531328320802,
+            "recall": 0.625,
+            "f1-score": 0.624765478424015,
+            "support": 200.0
+          }
+        },
+        "confusion_matrix": [
+          [
+            65,
+            35
+          ],
+          [
+            40,
+            60
+          ]
+        ]
+      },
+      "text_only": {
+        "accuracy": 0.7,
+        "macro_f1": 0.6995192307692308,
+        "classification_report": {
+          "0": {
+            "precision": 0.717391304347826,
+            "recall": 0.66,
+            "f1-score": 0.6875,
+            "support": 100.0
+          },
+          "1": {
+            "precision": 0.6851851851851852,
+            "recall": 0.74,
+            "f1-score": 0.7115384615384616,
+            "support": 100.0
+          },
+          "accuracy": 0.7,
+          "macro avg": {
+            "precision": 0.7012882447665056,
+            "recall": 0.7,
+            "f1-score": 0.6995192307692308,
+            "support": 200.0
+          },
+          "weighted avg": {
+            "precision": 0.7012882447665056,
+            "recall": 0.7,
+            "f1-score": 0.6995192307692308,
+            "support": 200.0
+          }
+        },
+        "confusion_matrix": [
+          [
+            66,
+            34
+          ],
+          [
+            26,
+            74
+          ]
+        ]
+      }
+    }
+  },
+  "resources": {
+    "hardware": "arm64",
+    "platform": "Darwin",
+    "device": "cpu",
+    "torch_threads": 1,
+    "encoder_load_seconds": 2.369902667007409,
+    "extraction": {
+      "train": {
+        "retained": 600,
+        "skipped": 0,
+        "seconds": 33.92703512503067,
+        "posts_sha256": "e2fe3b4ed9e83e0097de76ae939409082f5bca2e22824f364d97a1aac1bbb513"
+      },
+      "validation": {
+        "retained": 200,
+        "skipped": 0,
+        "seconds": 11.217394250037614,
+        "posts_sha256": "6cf124d1952126aebcc412a8f13deb3c50cc0a4a6a2b4703586248ebf039c3e9"
+      },
+      "test": {
+        "retained": 200,
+        "skipped": 0,
+        "seconds": 10.983123374986462,
+        "posts_sha256": "48a53e254c52d2580281444b3eb229df4b619216cf740ea05b5ec2d021f75247"
+      }
+    },
+    "training_and_ablations_seconds": 11.401249082991853,
+    "end_to_end_latency": {
+      "rows": 5,
+      "warmup_rows": 1,
+      "includes": "Loaded CLIP text/image encoding plus combined XGBoost predict_proba; excludes network, decoding and model loading",
+      "p50_ms": 55.48650003038347,
+      "p95_ms": 64.33450020849705
+    },
+    "process_peak_rss_bytes": 958988288,
+    "encoder_safetensors_bytes": 605157884,
+    "classifier_bytes": 751578
+  },
+  "artifacts": {
+    "metrics_sha256": "7ef8d7dad942981ab96dc72f9f665fa762eaf021b22834458456594900b42164",
+    "manifest_sha256": "cbcace0edd86e5dec0dd995fae155c567e2509527293dc3698891ec5c8c8d705",
+    "encoder_provenance": {
+      "downloaded_at": "2026-10-31T09:51:08.378236+00:00",
+      "repository": "openai/clip-vit-base-patch32",
+      "revision": "3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268",
+      "official_pytorch_sha256": "a63082132ba4f97a80bea76823f544493bffa8082296d62d71581a4feff1576f",
+      "conversion": "Verified official LFS SHA256, torch.load(weights_only=True), safetensors save_file; no unrestricted pickle loading",
+      "safetensors_sha256": "99d28a652e6ec46629ab7047a0ac82c69b1fe11e0ce672c43af65d3a9a3fc05d"
+    },
+    "first_20_error_ids": [
+      {
+        "id": "d71bmg",
+        "expected": 1,
+        "predicted": 0
+      },
+      {
+        "id": "8zq062",
+        "expected": 0,
+        "predicted": 1
+      },
+      {
+        "id": "4q3qu0",
+        "expected": 0,
+        "predicted": 1
+      },
+      {
+        "id": "8gbxhb",
+        "expected": 0,
+        "predicted": 1
+      },
+      {
+        "id": "c8qtiu",
+        "expected": 0,
+        "predicted": 1
+      },
+      {
+        "id": "82fi6w",
+        "expected": 0,
+        "predicted": 1
+      },
+      {
+        "id": "crqdm3",
+        "expected": 0,
+        "predicted": 1
+      },
+      {
+        "id": "89gafz",
+        "expected": 0,
+        "predicted": 1
+      },
+      {
+        "id": "c96ql8",
+        "expected": 0,
+        "predicted": 1
+      },
+      {
+        "id": "cuyffb",
+        "expected": 1,
+        "predicted": 0
+      },
+      {
+        "id": "77g5xd",
+        "expected": 0,
+        "predicted": 1
+      },
+      {
+        "id": "5doyld",
+        "expected": 0,
+        "predicted": 1
+      },
+      {
+        "id": "3ilbvn",
+        "expected": 1,
+        "predicted": 0
+      },
+      {
+        "id": "cy2ae7",
+        "expected": 0,
+        "predicted": 1
+      },
+      {
+        "id": "7uylf5",
+        "expected": 0,
+        "predicted": 1
+      },
+      {
+        "id": "ayhyzu",
+        "expected": 0,
+        "predicted": 1
+      },
+      {
+        "id": "8nfq68",
+        "expected": 0,
+        "predicted": 1
+      },
+      {
+        "id": "4ivc5a",
+        "expected": 1,
+        "predicted": 0
+      },
+      {
+        "id": "b49dvx",
+        "expected": 0,
+        "predicted": 1
+      },
+      {
+        "id": "9dtu8e",
+        "expected": 1,
+        "predicted": 0
+      }
+    ]
+  },
+  "limitations": [
+    "Small balanced availability-selected pilot; not a representative full Fakeddit benchmark or new release.",
+    "All three modalities use identical retained IDs and independent official splits; validation controls early stopping.",
+    "Exact image hashes and normalized text checked across splits; perceptual/semantic near duplicates and placeholders are not fully audited.",
+    "Latency sample is five warm CPU inferences; peak RSS covers the entire process, not incremental model memory.",
+    "No human-reviewed evidence accuracy, image authenticity or image-headline consistency is established.",
+    "Large CLIP artifacts remain offline; Vercel continues to serve the portable text classifier."
+  ]
+}

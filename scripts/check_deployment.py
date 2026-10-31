@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 
-def check(base_url):
+def check(base_url, require_verification=False):
     base_url = base_url.rstrip('/')
     host = urlparse(base_url).netloc
 
@@ -42,14 +42,23 @@ def check(base_url):
     detection = json.loads(request('/api/detect', method='POST', payload={'text': 'Scientists discover a new species in the rainforest'}))
     if detection.get('mode') != 'news_detection' or detection.get('model_assessment', {}).get('status') not in ('ready', 'uncertain'):
         raise RuntimeError('Trained news classifier did not return an assessment')
-    return {'url': base_url, 'status': 'passed', 'version': health.get('version'), 'checks': ['public homepage', 'GET/HEAD availability', 'frontend assets', 'API health', 'capabilities', 'text analysis', 'trained news detection']}
+    evidence = detection.get('verification', {})
+    if require_verification and evidence.get('status') != 'completed':
+        raise RuntimeError(f"Live source verification did not complete: {evidence.get('reason', 'unknown')}")
+    return {'url': base_url, 'status': 'passed', 'version': health.get('version'),
+            'verification': {'status': evidence.get('status'), 'reason': evidence.get('reason'),
+                             'claims': len(evidence.get('claims', [])), 'sources': len(evidence.get('sources', [])),
+                             'note': 'Connectivity check only; evidence correctness requires independent review.'},
+            'research_quota': capabilities.get('research_quota'),
+            'checks': ['public homepage', 'GET/HEAD availability', 'frontend assets', 'model card', 'API health', 'capabilities', 'text analysis', 'trained news detection']}
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('url', nargs='?', default='https://fakeddit-multimodal-fakenews.vercel.app')
+    parser.add_argument('--require-verification', action='store_true', help='Fail unless an actual live research call completes; does not measure evidence accuracy')
     args = parser.parse_args()
     try:
-        print(json.dumps(check(args.url), indent=2))
+        print(json.dumps(check(args.url, args.require_verification), indent=2))
     except (OSError, RuntimeError, ValueError) as error:
         parser.exit(1, f'Deployment check failed: {error}\n')

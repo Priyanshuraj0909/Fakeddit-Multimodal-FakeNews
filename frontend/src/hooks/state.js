@@ -17,6 +17,7 @@ export function buildReport(data, state, now = new Date()) {
     generated_at: now.toISOString(),
     context: { ...state.context },
     ...data,
+    submission: { text: state.text, mode: state.mode },
     attachments: Object.fromEntries(Object.entries(state.media).filter(([, media]) => media).map(([kind, media]) => [kind, { ...media.metadata, assessment: data.mode === 'trained_multimodal' && kind === 'image' ? 'Included in text-and-image model assessment' : 'Local preview only; no model inference' }])),
   };
 }

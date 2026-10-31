@@ -1,0 +1,642 @@
+{
+  "evaluated_at": "2026-10-31T09:43:16.497291+00:00",
+  "status": "exploratory_evaluation",
+  "model_sha256": "e8b2ae2ad0dec6790c97a09faa35f648fb5d887946822e335bd24b82bfb402c4",
+  "splits": {
+    "train": {
+      "prepared_sha256": "5b6df058d2e3523050c8cc1948e1fd6a87dc10ab28c717fee79cac49b2a6885d",
+      "raw_sha256": "9894cb4aa2f901c6f29b61ac3d95ce9f7e78c43be8062ae5deb1c219c82497bb",
+      "rows": 150000
+    },
+    "validation": {
+      "prepared_sha256": "f2535acc279443d4cb772a27ef02b35b0fdd8885fbd4ae474bf9f64ef894f163",
+      "raw_sha256": "c70140ec376e083e3780b5b488c96c8933678ca5800139bfb78c92e95df6946e",
+      "rows": 15000
+    },
+    "test": {
+      "prepared_sha256": "5776044d0353f4f36fde7f53ab2edd2be662a9fe9e6a7d6fcf2ec5e4186b630c",
+      "raw_sha256": "bc92378e070ca7b1a7497053d1c34cdc3f550be6232a76791a2c722d6d9bbf94",
+      "rows": 15000
+    }
+  },
+  "frozen_release_unseen_groups": {
+    "author": {
+      "status": "evaluated",
+      "rows": 7214,
+      "class_counts": {
+        "1": 3978,
+        "0": 3236
+      },
+      "accuracy": 0.7974771278070418,
+      "accuracy_wilson_95": [
+        0.7880459786962829,
+        0.8065916204441582
+      ],
+      "macro_f1": 0.7971693807699292,
+      "classification_report": {
+        "0": {
+          "precision": 0.7400595077089532,
+          "recall": 0.8454882571075402,
+          "f1-score": 0.7892687148420597,
+          "support": 3236.0
+        },
+        "1": {
+          "precision": 0.8578333807222064,
+          "recall": 0.7584213172448466,
+          "f1-score": 0.8050700466977986,
+          "support": 3978.0
+        },
+        "accuracy": 0.7974771278070418,
+        "macro avg": {
+          "precision": 0.7989464442155798,
+          "recall": 0.8019547871761934,
+          "f1-score": 0.7971693807699292,
+          "support": 7214.0
+        },
+        "weighted avg": {
+          "precision": 0.8050032929663308,
+          "recall": 0.7974771278070418,
+          "f1-score": 0.7979820081775365,
+          "support": 7214.0
+        }
+      },
+      "evaluated_ids_sha256": "4b47d1564add176c159312143cdd9f11fed92584856adf786bc985976949d376",
+      "error_count": 1461,
+      "first_20_error_ids": [
+        {
+          "id": "182hy9",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "cg9ejq",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "26o2uu",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "d5fs41",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "1eil1u",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "2566hp",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "bqkrth",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "bntf3g",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "dhdtm7",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "c48hyu",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "1lee8i",
+          "expected": 0,
+          "predicted": 1
+        },
+        {
+          "id": "delwyq",
+          "expected": 0,
+          "predicted": 1
+        },
+        {
+          "id": "6vc3my",
+          "expected": 0,
+          "predicted": 1
+        },
+        {
+          "id": "b3sf2d",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "27zetk",
+          "expected": 0,
+          "predicted": 1
+        },
+        {
+          "id": "7wzqot",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "6wb5iu",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "2hnq0p",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "7764wh",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "8slt30",
+          "expected": 1,
+          "predicted": 0
+        }
+      ]
+    },
+    "domain": {
+      "status": "evaluated",
+      "rows": 346,
+      "class_counts": {
+        "1": 265,
+        "0": 81
+      },
+      "accuracy": 0.7890173410404624,
+      "accuracy_wilson_95": [
+        0.7429710123062079,
+        0.8287162884607677
+      ],
+      "macro_f1": 0.7409834384453674,
+      "classification_report": {
+        "0": {
+          "precision": 0.5344827586206896,
+          "recall": 0.7654320987654321,
+          "f1-score": 0.6294416243654822,
+          "support": 81.0
+        },
+        "1": {
+          "precision": 0.9173913043478261,
+          "recall": 0.7962264150943397,
+          "f1-score": 0.8525252525252526,
+          "support": 265.0
+        },
+        "accuracy": 0.7890173410404624,
+        "macro avg": {
+          "precision": 0.7259370314842579,
+          "recall": 0.7808292569298858,
+          "f1-score": 0.7409834384453674,
+          "support": 346.0
+        },
+        "weighted avg": {
+          "precision": 0.8277508644521671,
+          "recall": 0.7890173410404624,
+          "f1-score": 0.8003004725225319,
+          "support": 346.0
+        }
+      },
+      "evaluated_ids_sha256": "4e3c6851b6cee8d926a7ce40c801f597096a08e442feec4af92d878c7d4e182d",
+      "error_count": 73,
+      "first_20_error_ids": [
+        {
+          "id": "26o2uu",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "1eil1u",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "3hdn65",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "9avr95",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "528e0n",
+          "expected": 0,
+          "predicted": 1
+        },
+        {
+          "id": "5ec881",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "4zlp1t",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "1rsy8j",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "8iepin",
+          "expected": 0,
+          "predicted": 1
+        },
+        {
+          "id": "312292",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "8n2k2p",
+          "expected": 0,
+          "predicted": 1
+        },
+        {
+          "id": "bsl1as",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "4wi3o0",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "2dk4nb",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "37bn4x",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "2upcls",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "8t1dp3",
+          "expected": 0,
+          "predicted": 1
+        },
+        {
+          "id": "4pay9n",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "8jm7d9",
+          "expected": 0,
+          "predicted": 1
+        },
+        {
+          "id": "1bx48x",
+          "expected": 1,
+          "predicted": 0
+        }
+      ]
+    },
+    "author_and_domain": {
+      "status": "evaluated",
+      "rows": 155,
+      "class_counts": {
+        "1": 122,
+        "0": 33
+      },
+      "accuracy": 0.7225806451612903,
+      "accuracy_wilson_95": [
+        0.6473614772075029,
+        0.7870335427368944
+      ],
+      "macro_f1": 0.6697388632872503,
+      "classification_report": {
+        "0": {
+          "precision": 0.4166666666666667,
+          "recall": 0.7575757575757576,
+          "f1-score": 0.5376344086021505,
+          "support": 33.0
+        },
+        "1": {
+          "precision": 0.9157894736842105,
+          "recall": 0.7131147540983607,
+          "f1-score": 0.8018433179723502,
+          "support": 122.0
+        },
+        "accuracy": 0.7225806451612903,
+        "macro avg": {
+          "precision": 0.6662280701754386,
+          "recall": 0.7353452558370591,
+          "f1-score": 0.6697388632872503,
+          "support": 155.0
+        },
+        "weighted avg": {
+          "precision": 0.8095246179966044,
+          "recall": 0.7225806451612903,
+          "f1-score": 0.7455923888806302,
+          "support": 155.0
+        }
+      },
+      "evaluated_ids_sha256": "fca4f5249c8f50a6db83eedbb444b4fe144d423ed31be95635ed78ee927964a8",
+      "error_count": 43,
+      "first_20_error_ids": [
+        {
+          "id": "26o2uu",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "1eil1u",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "3hdn65",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "4zlp1t",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "1rsy8j",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "8iepin",
+          "expected": 0,
+          "predicted": 1
+        },
+        {
+          "id": "312292",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "8n2k2p",
+          "expected": 0,
+          "predicted": 1
+        },
+        {
+          "id": "4wi3o0",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "2dk4nb",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "2upcls",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "8t1dp3",
+          "expected": 0,
+          "predicted": 1
+        },
+        {
+          "id": "4pay9n",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "8jm7d9",
+          "expected": 0,
+          "predicted": 1
+        },
+        {
+          "id": "4cu9sh",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "8g0qvz",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "80sl0i",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "3qmq2n",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "1s3ugi",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "53emf3",
+          "expected": 0,
+          "predicted": 1
+        }
+      ]
+    }
+  },
+  "group_protocol": "Test groups absent from BOTH training and validation; missing/deleted authors and missing domains excluded. Frozen release unchanged. Subgroups are not newly collected external data.",
+  "temporal": {
+    "cutoff_utc": "2018-01-01T00:00:00+00:00",
+    "seed": 42,
+    "max_features": 40000,
+    "selected_C": 10.0,
+    "selection": "Highest validation macro F1 on pre-cutoff validation only",
+    "validation_candidates": [
+      {
+        "C": 0.1,
+        "macro_f1": 0.7351920943004495
+      },
+      {
+        "C": 1.0,
+        "macro_f1": 0.8066089618582066
+      },
+      {
+        "C": 10.0,
+        "macro_f1": 0.8098098900651733
+      }
+    ],
+    "rows": {
+      "train": 86726,
+      "validation": 8536,
+      "test": 6406
+    },
+    "train_maximum": "2017-12-31T23:58:13+00:00",
+    "validation_maximum": "2017-12-31T20:10:34+00:00",
+    "test_minimum": "2018-01-01T03:11:22+00:00",
+    "test": {
+      "status": "evaluated",
+      "rows": 6406,
+      "class_counts": {
+        "1": 3625,
+        "0": 2781
+      },
+      "accuracy": 0.5640024976584452,
+      "accuracy_wilson_95": [
+        0.5518241833623532,
+        0.5761040949277063
+      ],
+      "macro_f1": 0.5534885510796745,
+      "classification_report": {
+        "0": {
+          "precision": 0.4986979166666667,
+          "recall": 0.8263214670981661,
+          "f1-score": 0.6220056841250508,
+          "support": 2781.0
+        },
+        "1": {
+          "precision": 0.7313681868743048,
+          "recall": 0.3627586206896552,
+          "f1-score": 0.4849714180342984,
+          "support": 3625.0
+        },
+        "accuracy": 0.5640024976584452,
+        "macro avg": {
+          "precision": 0.6150330517704857,
+          "recall": 0.5945400438939107,
+          "f1-score": 0.5534885510796745,
+          "support": 6406.0
+        },
+        "weighted avg": {
+          "precision": 0.6303603783436396,
+          "recall": 0.5640024976584452,
+          "f1-score": 0.5444613171910861,
+          "support": 6406.0
+        }
+      },
+      "evaluated_ids_sha256": "750626c0a9ff0d2f296a86fd8ed1f64817cfcdebe68217c9f2377fdbc07223ea",
+      "error_count": 2793,
+      "first_20_error_ids": [
+        {
+          "id": "cg9ejq",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "d5fs41",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "c2oiqm",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "d7ismc",
+          "expected": 0,
+          "predicted": 1
+        },
+        {
+          "id": "dku9td",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "9boig7",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "deybwb",
+          "expected": 0,
+          "predicted": 1
+        },
+        {
+          "id": "dapbws",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "8bgpbu",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "d20n3r",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "bqkrth",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "9hg4xn",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "bunarr",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "dhdtm7",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "b2me9e",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "c48hyu",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "bsdijx",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "cvwoaf",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "9fv98g",
+          "expected": 1,
+          "predicted": 0
+        },
+        {
+          "id": "aymm0q",
+          "expected": 1,
+          "predicted": 0
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "Exploratory stress tests on previously used official release subsets; not new external validation.",
+    "Temporal model is fitted from scratch on pre-cutoff train only; TF-IDF is never fitted on validation/test.",
+    "Cutoff fixed at 2018-01-01 before this experiment; not optimized using test scores.",
+    "Author/domain subgroup performance can reflect label/composition shifts; small subgroups have wide uncertainty.",
+    "Subreddit labels and semantic near-duplicates may still introduce shortcuts.",
+    "No factual-truth, image, consistency, evidence-support or new production model accuracy is established."
+  ]
+}

@@ -147,13 +147,58 @@ def test_shared_quota_uses_atomic_expiring_keys_and_preserves_denial_reason(monk
     limit = ResearchLimit(maximum=1, window=60)
     calls = []
     class SharedRedis:
-        def eval(self, script, keys, key, window):
-            calls.append((script, keys, key, window))
-            return len(calls)
+        def eval(self, script, keys, key, total_key, maximum, window, total_maximum, total_window):
+            calls.append((script, keys, key, window, total_key, total_maximum))
+            return int(len(calls) == 1)
     limit.redis = SharedRedis()
     assert limit.allow('private-client-identity')
     assert not limit.allow('private-client-identity')
     assert calls[0][2] == calls[1][2]
     assert 'private-client-identity' not in calls[0][2]
     assert "'EXPIRE'" in calls[0][0] and calls[0][3] == 60
+    assert calls[0][1] == 2 and '{research}' in calls[0][4]
     assert limit.failure_reason == 'shared_quota_denied'
+
+
+def test_total_budget_survives_client_eviction_and_expires(monkeypatch):
+    now = [0]
+    monkeypatch.delenv('FAKEDDIT_REDIS_URL', raising=False)
+    monkeypatch.setattr('backend.app.core.rate_limit.monotonic', lambda: now[0])
+    limit = ResearchLimit(capacity=1, total_maximum=2, total_window=100)
+    assert limit.allow('one') and limit.allow('two')
+    assert not limit.allow('three')
+    now[0] = 101
+    assert limit.allow('three')
+
+
+def test_only_vercel_platform_header_is_trusted_for_identity(monkeypatch):
+    from starlette.requests import Request
+    from backend.app.core.rate_limit import research_identity
+    request = Request({'type': 'http', 'client': ('127.0.0.1', 1), 'headers': [(b'x-vercel-forwarded-for', b'203.0.113.9'), (b'x-forwarded-for', b'198.51.100.2')]})
+    monkeypatch.delenv('VERCEL', raising=False)
+    assert research_identity(request) == '127.0.0.1'
+    monkeypatch.setenv('VERCEL', '1')
+    assert research_identity(request) == '203.0.113.9'
+    request = Request({'type': 'http', 'headers': [(b'x-vercel-forwarded-for', b'invalid')]})
+    assert research_identity(request) == 'unknown-vercel-client'
+
+
+def test_telemetry_correlates_verification_without_logging_submitted_content(monkeypatch):
+    import io
+    import json
+    import logging
+    monkeypatch.delenv('GROQ_API_KEY', raising=False)
+    output = io.StringIO()
+    logger = logging.getLogger('fakeddit.requests')
+    handler = logging.StreamHandler(output)
+    logger.addHandler(handler)
+    try:
+        response = client.post('/api/detect', json={'text': 'PRIVATE_SUBMITTED_NEWS_MARKER scientists discover rainforest species'})
+    finally:
+        logger.removeHandler(handler)
+    events = [json.loads(line) for line in output.getvalue().splitlines()]
+    evidence = next(event for event in events if event.get('event') == 'verification_result')
+    assert evidence['request_id'] == response.headers['x-request-id']
+    assert evidence['reason'] == 'missing_api_key'
+    assert 'PRIVATE_SUBMITTED_NEWS_MARKER' not in output.getvalue()
+    assert all('duration_ms' in event for event in events)

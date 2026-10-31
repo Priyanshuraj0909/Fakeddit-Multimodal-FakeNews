@@ -30,12 +30,25 @@ try {
       if (result.overflow) throw new Error(`Horizontal overflow at ${viewport.width}`);
       console.log(JSON.stringify({ viewport: viewport.width, script, ...result }));
     }
+    const submittedText = 'Scientists discover a new species in the rainforest\nA second paragraph retained for review.';
+    await page.selectOption('#mode', 'analyze');
+    await page.locator('#headline').fill(submittedText);
+    await page.locator('.verification-fields').evaluate(details => { details.open = true; });
+    await page.locator('#source-url').fill('https://example.com/original');
+    await page.locator('#publication-date').fill('2026-10-31');
+    await page.locator('#verification-notes').fill('Check the original event date.');
+    await page.locator('#analysis-form').evaluate(form => form.requestSubmit());
+    await page.waitForSelector('#result:not([hidden])');
     await page.selectOption('#review', 'needs_review');
     await page.click('#save-report');
     if (await page.locator('.history-entry').count() !== 1) throw new Error('Report was not saved');
     await page.reload();
     await page.locator('.history-open').click();
     if (await page.locator('#review').inputValue() !== 'needs_review') throw new Error('Review was not retained');
+    if (await page.locator('#headline').inputValue() !== submittedText || await page.locator('#mode').inputValue() !== 'analyze'
+        || await page.locator('#source-url').inputValue() !== 'https://example.com/original'
+        || await page.locator('#publication-date').inputValue() !== '2026-10-31'
+        || await page.locator('#verification-notes').inputValue() !== 'Check the original event date.') throw new Error('Original submission or context was not restored');
     await page.selectOption('#review', 'disagree');
     await page.click('#save-report');
     if (await page.locator('.history-entry').count() !== 1) throw new Error('Updating a review duplicated a saved report');
@@ -49,7 +62,7 @@ try {
     if (errors.length) throw new Error(errors.join('\n'));
     await context.close();
   }
-  if (process.env.FAKEDDIT_OCR_LIVE === '1') {
+  for (let attempt = 0; process.env.FAKEDDIT_OCR_LIVE === '1' && attempt < Number(process.env.FAKEDDIT_OCR_REPEATS || 1); attempt++) {
     const page = await browser.newPage();
     page.on('requestfailed', request => console.error(`OCR asset request failed: ${request.url()} ${request.failure()?.errorText}`));
     page.on('pageerror', error => console.error(`OCR browser error: ${error.message}`));

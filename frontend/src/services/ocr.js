@@ -35,7 +35,7 @@ export async function extractImageText(file, { signal, onProgress = () => {}, en
     await Promise.race([library.createWorker('eng', 1, {
       workerPath: `https://cdn.jsdelivr.net/npm/tesseract.js@${VERSION}/dist/worker.min.js`,
       corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@6.0.0',
-      langPath: 'https://tessdata.projectnaptha.com/4.0.0',
+      langPath: 'https://cdn.jsdelivr.net/npm/@tesseract.js-data/eng@1.0.0/4.0.0_best_int',
       logger: message => { if (!stopped) onProgress(message.status, message.progress); },
     }).then(instance => { worker = instance; if (stopped) instance.terminate().catch(() => {}); }), cancelled]);
     check();
@@ -46,7 +46,7 @@ export async function extractImageText(file, { signal, onProgress = () => {}, en
     if (text.length > 10000) throw new Error('Extracted text exceeds 10,000 characters. Crop the image and retry.');
     return { text, confidence: data.confidence, tsv: data.tsv || '', engine: `Tesseract.js ${VERSION}`, language: 'eng' };
   } catch (error) {
-    if (stopped && !signal?.aborted) throw new Error('Text extraction timed out. Try a smaller image.');
+    if (stopped && !signal?.aborted) throw new Error('OCR download or recognition timed out. Check your connection, then retry with a smaller image.');
     check();
     throw error;
   } finally {

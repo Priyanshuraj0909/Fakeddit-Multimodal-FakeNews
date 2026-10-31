@@ -3,7 +3,7 @@ import { requestJSON, validateAnalysis } from '../services/api.js';
 import { prepareMedia, readTextFile, formatSize, MEDIA_EXTENSIONS } from '../utils/media.js';
 import { createStore, buildReport, inspectMedia } from '../hooks/state.js';
 import { extractImageText } from '../services/ocr.js';
-import { readHistory, saveReport, deleteReport, clearHistory } from '../services/history.js';
+import { readHistory, saveReport, deleteReport, clearHistory, restoreReport } from '../services/history.js';
 
 const byId = id => document.getElementById(id);
 const store = createStore();
@@ -330,7 +330,7 @@ requestJSON('/api/capabilities', { timeout: 10000 }).then(capabilities => {
   const text = capabilities.text_classifier;
   const pair = capabilities.multimodal_classifier;
   byId('connection').dataset.status = 'online';
-  byId('connection-text').textContent = capabilities.verification?.available ? 'Detector + source verification ready' : pair.available ? 'Text + image model connected' : text.available ? 'Text model connected' : 'Text explorer online';
+  byId('connection-text').textContent = capabilities.verification?.available ? (text.available ? 'Text model + research configured' : 'Source research configured') : pair.available ? 'Text + image model connected' : text.available ? 'Text model connected' : 'Text explorer online';
   byId('capability-status').textContent = `Source verification: ${capabilities.verification?.status?.replaceAll('_', ' ') || 'unavailable'} · Text signals: available · Text classifier: ${text.status.replaceAll('_', ' ')} · Text + image: ${pair.status.replaceAll('_', ' ')} · Video: preview only`;
   for (const [mode, capability, label] of [['predict', text, 'Trained text classifier'], ['multimodal', pair, 'Text + image classifier']]) {
     const option = Array.from(byId('mode').options).find(item => item.value === mode);
@@ -394,10 +394,18 @@ function refreshHistory() {
       const model = entry.report.model_assessment || entry.report;
       open.textContent = `${new Date(entry.report.generated_at).toLocaleString()} · ${model.assessed_text || model.label || 'Text assessment'}${entry.review ? ' · ' + entry.review.replaceAll('_', ' ') : ''}`;
       open.addEventListener('click', () => {
-        invalidateReport();
+        ocrController?.abort();
+        removeMedia('image'); removeMedia('video');
+        const restored = restoreReport(entry.report);
+        setText(restored.text);
+        byId('mode').value = restored.mode;
+        byId('mode').dispatchEvent(new Event('change'));
+        for (const [id, key] of [['source-url', 'source_url'], ['publication-date', 'publication_date'], ['verification-notes', 'verification_notes']]) byId(id).value = restored.context[key];
+        ocrResult = entry.report.text_extraction || null;
         activeHistoryId = entry.id;
         byId('review').value = entry.review;
-        store.update({ status: 'ready', report: entry.report });
+        store.update({ text: restored.text, mode: restored.mode, context: restored.context, tab: 'text', status: 'ready', report: entry.report, uploadStatus: '', uploadError: '' });
+        message('history-status', !restored.complete ? 'Older report opened. Its complete original input was not saved; only available text was restored.' : restored.mode === 'multimodal' || Object.keys(entry.report.attachments).length ? 'Saved text and context restored. Media files are not saved; reattach them before reassessing.' : 'Original text, assessment mode and context restored.');
         byId('report-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
       const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'text-button'; remove.textContent = 'Delete';

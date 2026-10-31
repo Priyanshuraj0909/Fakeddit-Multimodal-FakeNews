@@ -32,3 +32,38 @@ def test_lexical_audit_handles_short_titles_and_matching_fingerprints():
     value = fingerprint('A sufficiently long headline for a lexical overlap test')
     assert fingerprint('Too short') is None
     assert near_overlap([value, None], [value, None])['candidate_overlap_rows'] == 1
+
+
+def test_unseen_groups_exclude_training_validation_and_unknown_identities():
+    import pandas as pd
+    from scripts.evaluate_shift import unseen_mask, summarize
+    reference = pd.DataFrame({'author': ['training-author', 'validation-author']})
+    query = pd.DataFrame({'author': ['training-author', 'validation-author', 'new-author', '[deleted]', None]})
+    assert unseen_mask(reference, query, 'author').tolist() == [False, False, True, False, False]
+    assert summarize(pd.DataFrame(), [])['status'] == 'unavailable'
+    frame = pd.DataFrame({'id':['one','two'], '2_way_label':[0,1]})
+    result = summarize(frame, [0,0])
+    assert result['rows'] == 2 and result['accuracy'] == .5
+    assert result['error_count'] == 1
+    assert result['first_20_error_ids'] == [{'id':'two', 'expected':1, 'predicted':0}]
+
+
+def test_pilot_downloads_are_limited_to_public_reddit_image_hosts():
+    from scripts.prepare_paired_pilot import allowed, fetch
+    assert allowed('https://preview.redd.it/example.jpg')
+    for url in ('http://preview.redd.it/x', 'https://preview.redd.it.evil.example/x', 'https://user:secret@preview.redd.it/x', 'https://preview.redd.it:123/x', 'https://preview.redd.it:invalid/x', 'https://127.0.0.1/x', None):
+        assert not allowed(url)
+    _, content, _, error = fetch({'id':'../outside', 'image_url':'https://preview.redd.it/x'})
+    assert content is None and error['reason'] == 'ValueError'
+
+
+def test_evidence_review_worksheet_never_generates_reference_labels(tmp_path):
+    import json
+    from scripts.create_evidence_review import worksheet
+    path=tmp_path/'report.json'
+    path.write_text(json.dumps({'verification':{'status':'completed','claims':[{'verdict':'supported','evidence_ids':[1]}],'sources':[{'id':1}]}}))
+    records=worksheet([path])
+    assert records[0]['reviews'][0]['expected_verdict'] is None
+    assert records[0]['reviews'][0]['citations'][0]['supports_assessment'] is None
+    with pytest.raises(ValueError):
+        evaluate(records)

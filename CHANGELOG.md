@@ -34,3 +34,13 @@ Optional paired inference, local encoder extraction, model contracts, upload val
 - Added optional shared Redis quotas and offline MLflow hooks; neither service is automatically provisioned.
 - Recorded real text reliability and generalization audits, with source-label shortcut limitations.
 - Added human-review evaluation tooling and desktop/mobile browser runner. Paired release, learned consistency and independent evidence quality evaluation remain pending.
+
+## 2.2.0 — 2026-10-31
+
+- Replaced deprecated OCR language hosting with maintained pinned data; verified three repeated real-browser extractions.
+- Saved reports now retain and restore full original text, mode and context, with explicit legacy/media limitations.
+- Added client/total research budgets, atomic Redis checks, trusted Vercel identity handling, active structured logs and correlated verification outcomes.
+- Recorded real unseen-author/domain and chronological text stress tests, exposing a time-shift weakness.
+- Acquired and evaluated a 600/200/200 real paired CLIP/XGBoost pilot with aligned modality ablations, resource measurements and paired uncertainty. The observed image gain is inconclusive; production stays text-v1.
+- Added bounded research download/reproduction tools and unlabeled independent evidence-review worksheets. Images, embeddings, full weights and secrets remain excluded from Git/deployment.
+- Corrected deployment phase status and added optional live research verification to the public deployment checker.

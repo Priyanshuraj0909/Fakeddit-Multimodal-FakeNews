@@ -57,9 +57,9 @@ Model and evidence results can disagree. The application does not combine them i
 | Uncertainty and abstention | Implemented | Scores below 0.65 are uncertain; unusable text receives no verdict |
 | Text feature contributions | Implemented | Signed contributions to the linear model score, separate from factual evidence |
 | Claim verification | Implemented; requires `GROQ_API_KEY` | Source research, per-claim verdicts, citations, and explicit provider failure status |
-| Browser workspace | Implemented | Text import, screenshot OCR, editable extraction, optional browser-local report history and reviews, JSON export, responsive layout |
+| Browser workspace | Implemented | Text import, screenshot OCR, editable extraction, optional browser-local reports with original-input restoration and reviews, JSON export, responsive layout |
 | Image/video inspection | Implemented; browser local | Previews and metadata; authenticity is not assessed |
-| CLIP + XGBoost pipeline | Experimental; requires artifacts | Local paired extraction, feature fusion, training, evaluation, and optional API inference |
+| CLIP + XGBoost pipeline | Small offline pilot evaluated | 600/200/200 paired examples, modality ablations and resource measurements; production image inference remains unavailable |
 | Standalone image benchmark | Pending | No independently evaluated image release bundled |
 | Video inference / image attribution | Planned | No deployed classifier or image attribution path |
 
@@ -148,7 +148,7 @@ For portable inference, fewer than three tokens, zero usable features, or vocabu
 
 Preparation checks the mapping against every supplied row, preserves post IDs, excludes ID and normalized exact-text overlap, and takes fixed-seed subsets within official splits. TF-IDF is fitted on training only; validation selects the model; test is reserved for final evaluation. Paired training additionally checks image hashes, feature IDs/order, encoder fingerprints, and modality dimensions.
 
-Raw datasets and downloaded images are **not committed**. Distant labels, Reddit/source bias, and incomplete semantic deduplication limit generalization. An [observational audit](docs/TEXT_GENERALIZATION_AUDIT.json) records author/source overlap and lexical near-duplicate candidates. Source/author-disjoint performance remains unmeasured. A training-subreddit majority baseline scores 100% on this test subset, demonstrating a source-label shortcut; the deployed model does not use this metadata. See [dataset contracts](docs/DATASET.md).
+Raw datasets and downloaded images are **not committed**. Distant labels, Reddit/source bias, and incomplete semantic deduplication limit generalization. An [observational audit](docs/TEXT_GENERALIZATION_AUDIT.json) records author/source overlap and lexical near-duplicate candidates. An additional [exploratory shift evaluation](docs/TEXT_SHIFT_EVALUATION.json) measures frozen-model performance on unseen authors/domains and a separately retrained chronological baseline; external generalization remains unmeasured. A training-subreddit majority baseline scores 100% on this test subset, demonstrating a source-label shortcut; the deployed model does not use this metadata. See [dataset contracts](docs/DATASET.md).
 
 ## Model performance
 
@@ -174,7 +174,34 @@ Classification values below come from [the recorded text-v1 release](docs/TEXT_M
 | Fake / misleading | 7,026 | 1,271 |
 | Real | 1,632 | 5,071 |
 
-These are conventional held-out classification metrics, not a separate evaluation of the UI's abstention policy or Groq verification. No verified multimodal benchmark is published for the new pipeline. Historical notebook results, including the previously reported 93.9%, are not comparable release metrics; [the historical review](PROJECT_REVIEW.md) documents evaluation and leakage concerns.
+These are conventional held-out classification metrics, not a separate evaluation of the UI's abstention policy or Groq verification. A small exploratory multimodal pilot is now recorded below; no full-corpus or deployed multimodal accuracy is claimed. Historical notebook results, including the previously reported 93.9%, are not comparable release metrics; [the historical review](PROJECT_REVIEW.md) documents evaluation and leakage concerns.
+
+## Multimodal research pilot
+
+The [recorded CLIP + XGBoost pilot](docs/MULTIMODAL_PILOT_EVALUATION.json) uses **600 training / 200 validation / 200 test** examples, balanced by dataset label. All three models use the same paired IDs. Official image URLs were downloaded with fixed-seed selection and exact image-hash checks across splits; availability selection and a small test size limit conclusions.
+
+| Modality | Test accuracy | Macro F1 | Fake-class recall | Real-class recall |
+| --- | ---: | ---: | ---: | ---: |
+| CLIP text-only | 70.0% | 0.6995 | 0.66 | 0.74 |
+| CLIP image-only | 62.5% | 0.6248 | 0.65 | 0.60 |
+| Combined | 72.5% | 0.7247 | 0.69 | 0.76 |
+
+The observed combined-versus-text macro-F1 difference is +0.0251. Its paired-bootstrap 95% interval is **−0.0300 to +0.0801**, and the exact McNemar p-value is **0.4731**. This pilot does **not establish a reliable image benefit**. See [paired uncertainty comparison](docs/MULTIMODAL_PILOT_COMPARISON.json).
+
+On this arm64 Mac, five warmed CPU encoding + classifier measurements had median **55.49 ms** and p95 **64.33 ms**; process-wide peak RSS was **959 MB**. The encoder weights are **605 MB**. These are small local timing samples, not a hosted performance guarantee. Raw images, features and full weights remain ignored; Vercel continues to serve text-v1. Pilot scores cannot be compared directly to the differently sampled text-v1 benchmark or interpreted as factual verification accuracy.
+
+## Generalization stress tests
+
+The historical 80.65% release accuracy describes the original dataset split. The [recorded exploratory shift evaluation](docs/TEXT_SHIFT_EVALUATION.json) adds these checks:
+
+| Experiment | Test rows | Accuracy | Macro F1 |
+| --- | ---: | ---: | ---: |
+| Frozen text-v1: authors absent from training and validation | 7,214 | 79.75% | 0.7972 |
+| Frozen text-v1: domains absent from training and validation | 346 | 78.90% | 0.7410 |
+| Frozen text-v1: both author and domain absent | 155 | 72.26% | 0.6697 |
+| Separately retrained pre-2018 model: 2018+ test examples | 6,406 | 56.40% | 0.5535 |
+
+The chronological experiment fits a fresh vectorizer and classifier on 86,726 pre-2018 training rows, selects C using 8,536 pre-2018 validation rows, and evaluates later test examples. It does not replace the deployed model. These exploratory subsets reuse existing data, small groups have wide uncertainty, and source-label shortcuts remain. They establish neither current-news performance nor factual verification accuracy.
 
 ## Quick start
 
@@ -356,9 +383,11 @@ Use reports to guide review. Do not treat them as definitive truth judgments or 
 - [x] Evaluate and bundle a lightweight text baseline with recorded provenance.
 - [x] Implement separate claim research, citations, and explicit failure states.
 - [x] Add API/frontend contracts and offline paired training tools.
-- [ ] Train and independently evaluate real CLIP fusion checkpoints and modality ablations.
+- [x] Train a small real CLIP fusion pilot with aligned modality ablations and resource measurements.
+- [ ] Scale and externally validate paired models before deploying image inference.
 - [x] Record a calibration experiment and observational overlap/source-shortcut audit.
-- [ ] Evaluate temporal and source/author-disjoint generalization.
+- [x] Record exploratory unseen-author/domain and chronological stress tests.
+- [ ] Validate on newly collected external data and an independently reviewed evidence set.
 - [x] Add editable screenshot OCR and optional browser-local report history.
 - [ ] Train and evaluate image–headline consistency on a suitable paired benchmark.
 - [ ] Evaluate standalone image models and add validated image explanations.

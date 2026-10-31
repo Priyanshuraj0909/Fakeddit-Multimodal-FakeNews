@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { extractImageText } from '../../frontend/src/services/ocr.js';
-import { readHistory, saveReport, deleteReport, clearHistory } from '../../frontend/src/services/history.js';
+import { readHistory, saveReport, deleteReport, clearHistory, restoreReport } from '../../frontend/src/services/history.js';
 
 const report = () => ({ generated_at: '2026-10-31T00:00:00Z', context: {}, attachments: {}, mode: 'descriptive', note: 'Synthetic test fixture', word_count: 4, character_count: 20, exclamation_count: 0, uppercase_ratio: 0, phrases: [] });
 function storage() { const map = new Map(); return { getItem: k => map.get(k) ?? null, setItem: (k,v) => map.set(k,v), removeItem: k => map.delete(k) }; }
@@ -23,6 +23,16 @@ test('history preserves explicit reviews, bounds entries and deletes without sav
 test('history reports corruption and full storage instead of silently losing saved reports', () => {
   assert.throws(() => readHistory({ getItem: () => '{broken' }));
   assert.throws(() => saveReport({ getItem: () => null, setItem: () => { throw new Error('quota'); } }, report(), '', 'id'), /quota/);
+});
+
+test('saved submissions restore full input and context; legacy reports disclose incomplete input', () => {
+  const current = { ...report(), submission: { text: 'Original headline\nFull article with corrections', mode: 'detect' }, context: { source_url: 'https://example.com', publication_date: '2026-10-31', verification_notes: 'Check event date' } };
+  const db = storage();
+  saveReport(db, current, '', 'current');
+  assert.deepEqual(restoreReport(readHistory(db)[0].report), { ...current.submission, context: current.context, complete: true });
+  assert.equal(restoreReport(report()).complete, false);
+  assert.equal(restoreReport(report()).text, '');
+  assert.throws(() => saveReport(db, { ...current, submission: { text: 'x'.repeat(10001), mode: 'detect' } }, '', 'bad'));
 });
 
 test('OCR returns recognition metadata and always terminates its worker', async () => {

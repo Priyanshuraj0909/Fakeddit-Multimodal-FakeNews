@@ -5,6 +5,7 @@ import os
 import logging
 from importlib.util import find_spec
 from functools import lru_cache
+from time import perf_counter
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
@@ -12,7 +13,7 @@ from fastapi.staticfiles import StaticFiles
 from backend.app.schemas.text import TextInput
 from backend.app.schemas.detection import DetectionInput
 from backend.app.services import verification
-from backend.app.core.rate_limit import ResearchLimit
+from backend.app.core.rate_limit import ResearchLimit, research_identity
 from backend.app.core.observability import RequestTelemetry
 from ml.inference import portable_text
 from starlette.concurrency import run_in_threadpool
@@ -24,7 +25,7 @@ from backend.app.api.uploads import router as upload_router, UploadBodyLimit, im
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_MODEL_DIR = ROOT / "models/exported/text-baseline"
 MODEL_DIR = Path(os.environ.get("FAKEDDIT_MODEL_DIR", str(DEFAULT_MODEL_DIR)))
-app = FastAPI(title="Fakeddit Fake News Detector API", version="2.1.0")
+app = FastAPI(title="Fakeddit Fake News Detector API", version="2.2.0")
 logger = logging.getLogger(__name__)
 research_limit = ResearchLimit()
 app.add_middleware(UploadBodyLimit)
@@ -49,9 +50,9 @@ def health():
     if use_portable():
         try:
             portable_text.load_release(str(portable_text.RELEASE))
-            return {"status": "ok", "model_available": True, "model_status": "ready", "model_kind": "portable_fakeddit_text", "version": "2.1.0"}
+            return {"status": "ok", "model_available": True, "model_status": "ready", "model_kind": "portable_fakeddit_text", "version": "2.2.0"}
         except (ValueError, OSError, KeyError):
-            return {"status": "ok", "model_available": False, "model_status": "invalid_artifacts", "version": "2.1.0"}
+            return {"status": "ok", "model_available": False, "model_status": "invalid_artifacts", "version": "2.2.0"}
     dependencies = all(find_spec(name) is not None for name in ("joblib", "sklearn", "numpy", "scipy"))
     artifacts = all((MODEL_DIR / name).is_file() for name in ("model.joblib", "metrics.json"))
     reason = "missing_artifacts" if not artifacts else "missing_dependencies" if not dependencies else "ready"
@@ -61,7 +62,7 @@ def health():
         except Exception:
             logger.exception("Text checkpoint readiness failed")
             reason = "invalid_artifacts"
-    return {"status": "ok", "model_available": reason == "ready", "model_status": reason, "version": "2.1.0"}
+    return {"status": "ok", "model_available": reason == "ready", "model_status": reason, "version": "2.2.0"}
 
 
 @app.get("/api/capabilities")
@@ -77,6 +78,7 @@ def capabilities():
         "video_inference": False,
         "fact_verification": verification.configuration()['available'],
         "verification": verification.configuration(),
+        "research_quota": research_limit.status(),
         "news_detection": True,
         "limits": {"text_characters": 10000, "image_bytes": 10 * 1024 * 1024, "inference_image_bytes": image_upload_limit(), "video_bytes": 50 * 1024 * 1024},
         "note": "Reports describe language and supplied media metadata. They do not establish factual truth.",
@@ -92,12 +94,23 @@ def model_card():
     provenance = json.loads(provenance_path.read_text())
     evaluation_path = ROOT / 'docs/TEXT_RELIABILITY_EVALUATION.json'
     evaluation = json.loads(evaluation_path.read_text()) if evaluation_path.is_file() else None
+    shift_path = ROOT / 'docs/TEXT_SHIFT_EVALUATION.json'
+    shift = json.loads(shift_path.read_text()) if shift_path.is_file() else None
+    pilot_path = ROOT / 'docs/MULTIMODAL_PILOT_EVALUATION.json'
+    pilot = json.loads(pilot_path.read_text()) if pilot_path.is_file() else None
+    comparison_path = ROOT / 'docs/MULTIMODAL_PILOT_COMPARISON.json'
+    comparison = json.loads(comparison_path.read_text()) if comparison_path.is_file() else None
     return {'release': provenance['release'], 'metrics': provenance['metrics'],
             'dataset': provenance['provenance']['dataset'], 'artifact_sha256': provenance['artifact']['sha256'],
             'runtime': health(), 'score_type': 'uncalibrated_model_scores',
             'reliability_evaluation': evaluation,
+            'shift_evaluation': shift,
+            'offline_multimodal_pilot': ({'status': pilot['status'], 'production_model_changed': False,
+                                          'metrics': pilot['metrics'], 'resources': pilot['resources'],
+                                          'comparison': comparison, 'limitations': pilot['limitations']} if pilot else None),
             'limitations': ['English Reddit headlines; not validated for full articles or other languages.',
                             'Dataset labels do not establish factual truth.',
+                            'Source-label shortcuts and time shift limit generalization; review the recorded stress tests.',
                             'No evaluated paired image release is bundled.',
                             'Calibration experiments do not change the production model.']}
 
@@ -177,11 +190,16 @@ async def detect_news(payload: DetectionInput, request: Request):
         model = {"status": "unavailable", "label": "Model unavailable", "probabilities": {},
                  "note": "No trained model prediction could be produced."}
     config = verification.configuration()
-    identity = request.client.host if request.client else 'unknown'
+    research_start = perf_counter()
+    identity = research_identity(request)
     if config['available'] and not await run_in_threadpool(research_limit.allow, identity):
         evidence = verification.unavailable(research_limit.failure_reason)
     else:
         evidence = await verification.verify(text, payload.source_url, payload.publication_date)
+    logging.getLogger('fakeddit.requests').info(json.dumps({
+        'event': 'verification_result', 'request_id': getattr(request.state, 'request_id', None),
+        'status': evidence.get('status'), 'reason': evidence.get('reason'),
+        'duration_ms': round((perf_counter()-research_start)*1000, 2)}))
     return {"mode": "news_detection", "model_assessment": model, "verification": evidence,
             "note": "Model prediction and source verification answer different questions. A model score is not a factual verdict."}
 

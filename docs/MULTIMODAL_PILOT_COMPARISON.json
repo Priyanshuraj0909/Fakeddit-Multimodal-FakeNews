@@ -1,0 +1,25 @@
+{
+  "evaluated_at": "2026-10-31T09:54:50.098662+00:00",
+  "pilot_report_sha256": "ab55da7cca037366376ecb29f45ad0d4eeb298723398f98fe5a7cfdc6df639a2",
+  "rows": 200,
+  "comparison": "Fixed CLIP text-only versus fixed CLIP combined XGBoost on identical pilot test IDs",
+  "macro_f1_delta": 0.025143481052751104,
+  "paired_bootstrap": {
+    "seed": 42,
+    "resamples": 2000,
+    "percentile_95_interval": [
+      -0.030027198798851004,
+      0.08013528277462838
+    ]
+  },
+  "correctness_discordance": {
+    "combined_only_correct": 18,
+    "text_only_correct": 13,
+    "exact_two_sided_mcnemar_p": 0.47312965989112854
+  },
+  "limitations": [
+    "Exploratory uncertainty estimates on a small availability-selected balanced pilot, not external validation.",
+    "Bootstrap resamples paired examples; it does not capture training, source-cluster or dataset-selection uncertainty.",
+    "Models and hyperparameters are fixed; this comparison does not select or deploy a model."
+  ]
+}

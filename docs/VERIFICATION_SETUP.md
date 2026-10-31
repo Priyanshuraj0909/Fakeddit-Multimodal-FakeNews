@@ -9,6 +9,8 @@ The server first requires Groq browser_search, accepts sources from executed bro
 
 The default combined flow evaluates a headline (first nonempty line, up to 400 characters) with the trained English Fakeddit model and examines the full submitted news text for claims. User source URL and publication date guide research; private notes and media are not sent to Groq. Input/page instructions are treated as untrusted data.
 
-Verification is bounded to 50 seconds and five requests per client per worker per minute. This in-memory limit is not a distributed quota; production traffic additionally needs platform rate limits and Groq account spend limits. No data is persisted by this app. Groq/search-provider data handling applies to submitted claims.
+Verification is bounded to 50 seconds and five requests per client per minute plus 100 total requests per hour by default. FAKEDDIT_RESEARCH_TOTAL_MAX overrides the total. Set FAKEDDIT_REDIS_URL for atomic shared quotas; otherwise both budgets are process-local. Vercel uses its overwritten client-IP header; production traffic additionally needs platform rate limits and Groq account spend limits. No data is persisted by this app. Groq/search-provider data handling applies to submitted claims.
 
 Official API references: https://console.groq.com/docs/tool-use/built-in-tools/browser-search and https://console.groq.com/docs/structured-outputs.
+
+After configuring Production credentials and redeploying, run `.venv/bin/python scripts/check_deployment.py --require-verification`. Its output distinguishes live completion from missing credentials, provider failure, timeout and quota denial. A completed response still requires independent evidence review.

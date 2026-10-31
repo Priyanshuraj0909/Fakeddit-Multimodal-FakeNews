@@ -1,6 +1,7 @@
 """Shared local-only CLIP preprocessing and inference; optional heavy dependencies."""
 from pathlib import Path
 from importlib.metadata import version
+import os
 import numpy as np
 from ml.utils.contracts import encoder_fingerprint, PREPROCESSING
 
@@ -9,6 +10,10 @@ class ClipEncoder:
     def __init__(self, directory, expected_fingerprint=None, expected_packages=None):
         import torch
         from transformers import CLIPModel, CLIPProcessor
+        threads = int(os.environ.get('FAKEDDIT_CLIP_THREADS', '1'))
+        if threads < 1:
+            raise ValueError('FAKEDDIT_CLIP_THREADS must be positive')
+        torch.set_num_threads(threads)
         self.packages = {name: version(name) for name in ("torch", "transformers")}
         if expected_packages and self.packages != expected_packages:
             raise ValueError("Encoder dependency versions differ from the training environment")
@@ -18,7 +23,7 @@ class ClipEncoder:
             raise ValueError("Encoder snapshot differs from the training checkpoint")
         # CPU is portable; no network requests or automatic weight downloads.
         self.torch = torch
-        self.processor = CLIPProcessor.from_pretrained(str(directory), local_files_only=True)
+        self.processor = CLIPProcessor.from_pretrained(str(directory), local_files_only=True, use_fast=False)
         self.model = CLIPModel.from_pretrained(str(directory), local_files_only=True, use_safetensors=True).to("cpu").eval()
 
     def _normalize(self, tensor):

@@ -140,3 +140,7 @@ python scripts/export_text_release.py --directory models/exported/text-release-v
 ```
 
 Use a fresh output directory for repeat experiments. The portable export is intentionally versioned; datasets and joblib outputs are ignored. See MODEL.md and TEXT_MODEL_RELEASE.json for actual evaluation and limitations.
+
+## Small paired pilot
+
+See [EVALUATION.md](EVALUATION.md) for the bounded Reddit-image acquisition script, pinned official CLIP downloader, CPU extraction/training/resource runner, and paired uncertainty comparison. All resulting images, features and full weights remain in ignored offline directories. A successful small pilot does not enable production image inference or provide image–headline consistency labels.

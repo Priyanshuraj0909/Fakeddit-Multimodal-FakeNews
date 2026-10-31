@@ -25,7 +25,7 @@ The evaluator checks exact ID/content disjointness and split counts; users must 
 
 [TEXT_GENERALIZATION_AUDIT.json](TEXT_GENERALIZATION_AUDIT.json) records an observational audit against official raw metadata. About **48.18%** of known test authors and **96.89%** of known test domains also appear in training. All test subreddits appear in training. Train-only majority baselines score **72.60%** test accuracy using domain and **100%** using subreddit. The deployed text model does not use these metadata features. This exposes dataset construction shortcuts and does not establish real-world fact-checking accuracy.
 
-A 64-bit lexical SimHash audit found **3 candidate test overlaps** among 10,969 eligible test headlines (minimum five tokens, word/unigram-bigram sets, Hamming distance ≤3). These are candidates requiring review, not proven duplicates or evidence that all other examples are independent. Existing official splits are preserved. No source/author-disjoint, semantic-duplicate or temporal benchmark has been completed.
+A 64-bit lexical SimHash audit found **3 candidate test overlaps** among 10,969 eligible test headlines (minimum five tokens, word/unigram-bigram sets, Hamming distance ≤3). These are candidates requiring review, not proven duplicates or evidence that all other examples are independent. Existing official splits are preserved. The observational audit itself does not measure disjoint or temporal performance. A subsequent exploratory stress evaluation is described below; semantic-duplicate and fresh external evaluation remain pending.
 
 ```bash
 .venv/bin/python scripts/audit_generalization.py \
@@ -54,10 +54,67 @@ The UI exposes retrieval timestamps and a short initial excerpt for context. Cit
 
 ## Paired release and consistency
 
-A real multimodal evaluation remains blocked by missing paired image files and a compatible local CLIP snapshot. Text-only, image-only and combined benchmarks must use exactly the same paired IDs. Use the existing multimodal training `--compare` option; record class recall, macro F1, latency, memory and reviewed errors before releasing. No such release metrics are claimed here.
+A small real paired pilot is now evaluated, as detailed below. It uses identical paired IDs across modalities and records class recall, macro F1, latency, memory, and error IDs. Full-corpus evaluation and deployment remain pending.
 
 A learned image–headline consistency classifier and NewsCLIPpings evaluation remain pending. Low CLIP similarity alone must not create a fake verdict. OCR extracts text for subsequent review; it does not assess image authenticity or consistency.
 
 ## Optional experiment tracking
 
 Install `mlflow-skinny` from requirements-observability.txt in the offline training environment, then set `FAKEDDIT_MLFLOW_URI` to your tracking service. Text and paired training hooks record nested metrics, split fingerprints, parameters, and evaluation reports; paired runs include the encoder fingerprint and manifest. Error reports contain IDs and expected/predicted dataset labels. Raw datasets, full weights and submitted news are not automatically uploaded. No live MLflow service has been validated.
+
+## Exploratory generalization stress tests — 2026-10-31
+
+[TEXT_SHIFT_EVALUATION.json](TEXT_SHIFT_EVALUATION.json) records real measurements, input/model hashes, uncertainty intervals, class recall, and representative error IDs. Frozen text-v1 is evaluated on test authors/domains absent from both training and validation. Author-only: 7,214 rows, 79.75% accuracy, 0.7972 macro F1. Domain-only: 346 rows, 78.90%, 0.7410. Both: 155 rows, 72.26%, 0.6697. These small, differently composed subsets cannot be treated as a representative external benchmark.
+
+A fresh TF-IDF + Logistic Regression baseline was fitted using 86,726 pre-2018 training rows. C was selected solely on 8,536 pre-2018 validation rows. On 6,406 later test examples, accuracy was **56.40%** and macro F1 **0.5535**. The cutoff was fixed before examining this experiment's scores; the experiment is exploratory and reuses a previously evaluated test dataset. This is a separate chronological model; production stays unchanged. The result demonstrates a time-shift weakness and motivates a new external test corpus.
+
+```bash
+.venv/bin/python scripts/evaluate_shift.py --output artifacts/shift-reproduction.json
+```
+
+The script verifies the frozen model and prepared splits against recorded release hashes, preserves all original splits, excludes unknown/deleted identities from unseen-group denominators, and fits preprocessing only on earlier training examples. No raw text is written into the public result.
+
+## Real paired pilot and reproducibility — 2026-10-31
+
+[MULTIMODAL_PILOT_EVALUATION.json](MULTIMODAL_PILOT_EVALUATION.json) records 600/200/200 balanced samples drawn in seeded candidate batches from the existing independent official text splits. Image URLs are restricted to HTTPS Reddit image hosts; redirects stay on those hosts, decoded images have byte/pixel limits, IDs remain intact, and duplicate exact image hashes are rejected across splits. 79 attempted downloads/duplicates were skipped; image availability creates selection bias. No semantic/perceptual deduplication or exhaustive placeholder-image review is claimed.
+
+The official openai/clip-vit-base-patch32 snapshot is pinned to revision 3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268. The downloader checks the published LFS weight hash, loads only tensor weights with torch.load(weights_only=True), and converts to safetensors. Inference still requires local files and never downloads weights. Extraction uses the explicitly selected slow processor, CPU and one PyTorch thread. An initial four-thread run encountered a native-process fault; the recorded one-thread full evaluation completed. Exact package versions, encoder fingerprints, split hashes and checkpoint hashes are in the report.
+
+Test macro F1: text-only 0.6995, image-only 0.6248, combined 0.7247. See the report for class recall, confusion matrices, validation metrics and error IDs. All modalities use the same retained test examples; validation controls early stopping. Raw texts, images, embeddings and full checkpoints are not committed. The pilot is not a production model release and does not replace text-v1.
+
+[MULTIMODAL_PILOT_COMPARISON.json](MULTIMODAL_PILOT_COMPARISON.json) reproduces the fixed text-only baseline and compares paired predictions with the combined model. Macro-F1 difference +0.0251 has paired-bootstrap 95% interval [-0.0300, 0.0801] over 2,000 resamples (seed 42). Combined-only correct: 18; text-only correct: 13; exact two-sided McNemar p=0.4731. This small pilot does not demonstrate a reliable image benefit. Bootstrap uncertainty excludes training, source-cluster and availability-selection uncertainty.
+
+Reproduce into new directories; the scripts preserve existing artifacts:
+
+```bash
+.venv/bin/python -m pip install -r requirements-multimodal.txt
+.venv/bin/python scripts/prepare_paired_pilot.py --output data/processed/paired-pilot-reproduction
+.venv/bin/python scripts/download_clip_snapshot.py --output models/checkpoints/clip-reproduction
+.venv/bin/python scripts/run_paired_pilot.py \
+  --paired data/processed/paired-pilot-reproduction \
+  --encoder models/checkpoints/clip-reproduction \
+  --features data/processed/paired-features-reproduction \
+  --model models/exported/paired-model-reproduction \
+  --output artifacts/paired-evaluation-reproduction.json
+.venv/bin/python scripts/compare_paired_predictions.py \
+  --features data/processed/paired-features-reproduction \
+  --model models/exported/paired-model-reproduction \
+  --report artifacts/paired-evaluation-reproduction.json \
+  --output artifacts/paired-comparison-reproduction.json
+```
+
+Downloads require network access; the pinned CLIP snapshot is approximately 605 MB. Live image URLs can disappear or change, so seeds alone do not guarantee identical future retained IDs. Use recorded hashes for exact comparisons. CPU resource measurements cover a tiny warmed sample; peak RSS covers the entire extraction/training process.
+
+## Independent evidence-review collection
+
+After exporting actual completed evidence reports, create an unlabeled worksheet:
+
+```bash
+.venv/bin/python scripts/create_evidence_review.py \
+  --reports artifacts/report-one.json artifacts/report-two.json \
+  --output artifacts/review-worksheet.jsonl
+```
+
+Expected verdicts and citation support are deliberately null. An independent reviewer must inspect original claims and sources before filling them. The evaluator rejects unreviewed reference values. No independent human-reviewed corpus or evidence-quality score has been invented.
+
+A learned image–headline consistency model remains pending. The official NewsCLIPpings repository requires its matched-pair annotations plus the corresponding VisualNews images/metadata or compatible published features. Fakeddit's fake/real labels do not supply this separate consistency target. The newly evaluated fusion model must not be presented as an image–headline consistency detector.
