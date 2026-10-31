@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 
 import httpx
 from backend.app.schemas.detection import EVIDENCE_SCHEMA, EvidenceAssessment
+from backend.app.core.tracing import stage
 
 logger = logging.getLogger(__name__)
 ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions'
@@ -100,6 +101,12 @@ def grounded_report(assessment, sources):
 
 
 async def groq_request(client, payload):
+    name = 'provider.search' if payload.get('tools') else 'provider.assess'
+    with stage(name, provider='Groq'):
+        return await _groq_request(client, payload)
+
+
+async def _groq_request(client, payload):
     response = await client.post(ENDPOINT, json=payload,
                                  headers={'Authorization': 'Bearer '+os.environ['GROQ_API_KEY'], 'Content-Type': 'application/json'})
     response.raise_for_status()

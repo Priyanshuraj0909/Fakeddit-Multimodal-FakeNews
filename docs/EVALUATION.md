@@ -118,3 +118,29 @@ After exporting actual completed evidence reports, create an unlabeled worksheet
 Expected verdicts and citation support are deliberately null. An independent reviewer must inspect original claims and sources before filling them. The evaluator rejects unreviewed reference values. No independent human-reviewed corpus or evidence-quality score has been invented.
 
 A learned image–headline consistency model remains pending. The official NewsCLIPpings repository requires its matched-pair annotations plus the corresponding VisualNews images/metadata or compatible published features. Fakeddit's fake/real labels do not supply this separate consistency target. The newly evaluated fusion model must not be presented as an image–headline consistency detector.
+
+## Capturing and reviewing a real verification benchmark
+
+No independently reviewed 100-claim corpus is available in this repository. A target size is not a completed dataset; expected verdicts, citation judgments and correctness metrics remain unavailable until supplied by independent reviewers.
+
+Prepare an ignored JSONL file of actual cases, each with unique id, text and optional source_url/publication_date. The file is bounded to 1–100 cases. Then:
+
+```bash
+.venv/bin/python scripts/run_verification_batch.py \
+  --cases artifacts/actual-cases.jsonl --maximum 100 \
+  --output artifacts/verification-run.jsonl
+.venv/bin/python scripts/create_evidence_review.py \
+  --reports artifacts/verification-run.jsonl --output artifacts/review-worksheet.jsonl
+# Independent reviewers fill reference judgments and reviewer provenance.
+.venv/bin/python scripts/evaluate_verification.py \
+  --reviews artifacts/review-worksheet.jsonl --require-independent \
+  --output artifacts/reviewed-evaluation.json
+```
+
+The runner checks runtime configuration before paid calls, waits at least 13 seconds between calls, and stops at the first unavailable/transport failure. Output preserves actual elapsed time, request/trace IDs and submitted context. It writes an unavailable manifest without inventing reports when credentials are missing. Captured submissions and run data belong in ignored artifacts/, never Git. HTTP/network failures retain a transport-error record with report=null, not a fabricated verification response.
+
+The worksheet accepts report JSON or captured JSONL, retains unavailable/transport runs and latency, and leaves expected_verdict/supports_assessment null. Fill review_metadata.reviewer_id, reviewed_at (timezone-aware) and independent=true after real independent review. Metadata records an attestation; it cannot prove that a reviewer is independent. The strict evaluator rejects missing provenance for reviewed claims and unfilled reference judgments. Legacy records can still be scored without the strict flag, but the output separately reports provenance coverage.
+
+Evaluation reports reviewed-claim verdict agreement, citation support, citation-review coverage, all attempted service statuses/unavailable reasons, unavailable fraction and median/p95-nearest-rank latency. Unknown legacy statuses are excluded from the service-failure denominator. With no reviewed claims, correctness metrics are null and status is unavailable, even if service timing is measurable. These statistics do not establish retrieval recall or the correctness of unreviewed citations.
+
+Re-ranking, ONNX quantization and C2PA remain later experiments/features. No production re-ranking model, quantized model or image-provenance judgment is claimed by this release; the immediate milestone is a reproducible, observable verification workflow.

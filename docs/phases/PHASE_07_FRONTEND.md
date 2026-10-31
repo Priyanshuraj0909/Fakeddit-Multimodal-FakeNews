@@ -9,3 +9,5 @@ See docs/MODEL.md, docs/TEXT_MODEL_RELEASE.json and docs/VERIFICATION_SETUP.md.
 2026-10-31: Added on-device English Tesseract.js OCR with cancellation, editable text and exported word locations; optional localStorage history (20 reports) with explicit saving and independent human reviews. No account-backed database or learned image consistency assessment is claimed.
 
 2026-10-31: Replaced deprecated OCR language hosting with pinned maintained data. Saved reports retain and restore original text, mode and context; legacy input gaps are explicit and media requires reattachment.
+
+2026-10-31: Release 2.3: API origin can be explicitly configured for GitHub Pages; the same workspace is packaged with prefix-safe assets and real Vercel API calls. Desktop/mobile package checks use the actual local classifier through an explicit test transport proxy.

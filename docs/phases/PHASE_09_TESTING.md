@@ -11,3 +11,5 @@ Acceptance: verify the documented behavior with representative inputs, record ac
 2026-10-31: Added reliability, citation-review, lexical audit, OCR lifecycle and history tests. Browser runner covers desktop/mobile and optional real CDN-backed OCR (FAKEDDIT_OCR_LIVE=1). See VERIFICATION.md for checks actually run.
 
 2026-10-31: Added original-input restoration, total-budget expiry, trusted-header, telemetry privacy, unseen-group and download-host tests. Three repeated real OCR runs and desktop/mobile restoration checks passed.
+
+2026-10-31: Release 2.3: SDK span parentage/privacy, approved-origin CORS, Pages packaging/routing, batch preflight/transport failures and review provenance/failure denominators are tested. No real evidence-quality score is inferred from fixtures.

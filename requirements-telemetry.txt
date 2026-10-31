@@ -1,0 +1,2 @@
+# Optional remote OTLP/HTTP collector export. Console tracing needs only app dependencies.
+opentelemetry-exporter-otlp-proto-http>=1.30,<2

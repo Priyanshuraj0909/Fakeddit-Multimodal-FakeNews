@@ -11,7 +11,7 @@
 ![scikit-learn](https://img.shields.io/badge/ML-scikit--learn-F7931E?logo=scikitlearn&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/Frontend-Native_JavaScript-F7DF1E?logo=javascript&logoColor=black)
 
-[**Live Demo ↗**](https://fakeddit-multimodal-fakenews.vercel.app) · [Documentation](#documentation) · [Quick Start](#quick-start) · [Evaluation](#model-performance) · [API](#api-reference)
+[**Live Demo ↗**](https://fakeddit-multimodal-fakenews.vercel.app) · [GitHub Pages workspace](https://priyanshuraj0909.github.io/Fakeddit-Multimodal-FakeNews/) · [Documentation](#documentation) · [Quick Start](#quick-start) · [Evaluation](#model-performance) · [API](#api-reference)
 
 | Test accuracy | Test macro F1 | Train / validation / test |
 | :---: | :---: | :---: |
@@ -65,6 +65,14 @@ Model and evidence results can disagree. The application does not combine them i
 
 Missing paired checkpoints return **503 unavailable**, never replacement predictions. Groq being configured does not establish that a live verification request will succeed. Consult `/api/capabilities` for runtime readiness.
 
+## Operational tracing and evidence-review workflow
+
+Release 2.3 adds manual OpenTelemetry spans for requests, classification, quotas, verification and provider search/assessment. Responses include an `x-trace-id` alongside `x-request-id`. By default, 10% of traces are exported to hosting console logs; request metadata logs still cover every request. Submitted text, source URLs and exception messages are excluded from span attributes. A remote OTLP collector is optional and requires separate configuration.
+
+The verification batch runner captures actual reports, latency, request/trace IDs and service failures for up to 100 supplied cases. It creates no reference labels. Review worksheets retain failed runs and leave expected verdicts/citation support blank until independent review; strict evaluation requires reviewer provenance. An unavailable or unreviewed benchmark has null correctness metrics. See [evaluation workflow](docs/EVALUATION.md) and [operations](docs/DEPLOYMENT.md).
+
+The GitHub Pages workspace uses the same real FastAPI service hosted on Vercel. It packages browser assets only, handles the repository URL prefix, and includes a public API origin configuration. Server credentials, datasets and model weights are never included in the static package. Publication is gated on successful main-branch CI.
+
 ## Technology stack
 
 | Area | Verified technologies |
@@ -76,8 +84,9 @@ Missing paired checkpoints return **503 unavailable**, never replacement predict
 | Backend | FastAPI, Uvicorn, Pydantic, HTTPX, Pillow, python-multipart |
 | Frontend | Native browser modules; no bundler or frontend framework |
 | External AI service | Groq API with browser search and structured claim assessments |
-| Hosting / packaging | Vercel configuration, Dockerfile, Docker Compose |
+| Hosting / packaging | Vercel API/application, GitHub Pages browser packaging/workflow, Dockerfile, Docker Compose |
 | Verification / tools | pytest, Node test runner, browser smoke scripts, GitHub Actions, Git |
+| Observability | OpenTelemetry request/stage spans, sampled console export, optional OTLP collector export |
 
 Heavy training and CLIP dependencies are optional. The bundled text release runs without scikit-learn, PyTorch, or joblib at inference time.
 
@@ -259,7 +268,7 @@ This runs pytest, JavaScript syntax checks, Node tests, and `git diff --check`. 
 
 ## API reference
 
-No API authentication or persistence is implemented. Interactive `/docs` and the running `/openapi.json` describe request schemas; response contracts are also documented in [docs/API.md](docs/API.md).
+No API authentication or server-side report persistence is implemented. Optional report history stays in your browser. Interactive `/docs` and the running `/openapi.json` describe request schemas; response contracts are also documented in [docs/API.md](docs/API.md).
 
 | Method | Endpoint | Request | Response purpose |
 | --- | --- | --- | --- |

@@ -60,3 +60,13 @@ test('OCR rejects empty results and unsupported formats', async () => {
   const engine = { createWorker: async () => ({ recognize: async () => ({ data: { text: '' } }), terminate: async () => {} }) };
   await assert.rejects(extractImageText(new File(['x'], 'x.png', { type: 'image/png' }), { engine }), /No readable text/);
 });
+
+test('Pages API routing accepts only a configured HTTPS origin and preserves same-origin defaults', async () => {
+  const { apiPath } = await import('../../frontend/src/services/api.js');
+  assert.equal(apiPath('/api/health', ''), '/api/health');
+  assert.equal(apiPath('/api/detect', 'https://example.com'), 'https://example.com/api/detect');
+  assert.throws(() => apiPath('/api/health', 'http://example.com'));
+  assert.throws(() => apiPath('/api/health', 'https://user:secret@example.com'));
+  assert.throws(() => apiPath('/api/health', 'https://example.com/private'));
+  assert.throws(() => apiPath('//other.example/api/health', 'https://example.com'));
+});

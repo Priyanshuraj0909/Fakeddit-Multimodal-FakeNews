@@ -44,3 +44,11 @@ Optional paired inference, local encoder extraction, model contracts, upload val
 - Acquired and evaluated a 600/200/200 real paired CLIP/XGBoost pilot with aligned modality ablations, resource measurements and paired uncertainty. The observed image gain is inconclusive; production stays text-v1.
 - Added bounded research download/reproduction tools and unlabeled independent evidence-review worksheets. Images, embeddings, full weights and secrets remain excluded from Git/deployment.
 - Corrected deployment phase status and added optional live research verification to the public deployment checker.
+
+## 2.3.0 — 2026-10-31
+
+- Added real manual OpenTelemetry request/classification/quota/verification/provider tracing, sampled console export and optional OTLP setup.
+- Added GitHub Pages browser packaging, explicit HTTPS API routing, restricted CORS and CI-gated publishing.
+- Added bounded verification batch capture, transport-failure recording and independent reviewer provenance; correctness metrics remain null without reviews.
+- Extended review worksheets/evaluation to preserve failed runs and measure service outcomes, latency and citation-review coverage.
+- Kept re-ranking, quantization and C2PA as later evaluated work; no new detector accuracy or reviewed dataset is claimed.

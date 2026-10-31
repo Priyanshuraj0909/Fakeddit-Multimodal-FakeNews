@@ -9,3 +9,5 @@ See docs/MODEL.md, docs/TEXT_MODEL_RELEASE.json and docs/VERIFICATION_SETUP.md.
 2026-10-31: Added source excerpts/retrieval timestamps, /api/model-card, request IDs/timing logs, and optional Redis shared research quotas that deny research on dependency/service failure. Live Redis and provider evidence quality are not established by mocked checks.
 
 2026-10-31: Added atomic client/total research budgets, Vercel-specific trusted client header, explicit quota configuration in capabilities, active INFO telemetry and correlated verification outcomes. Real local Redis checks passed; production services still require configuration.
+
+2026-10-31: Release 2.3: OpenTelemetry manual request/model/quota/provider spans, trace IDs, sampled console export and optional OTLP configuration. Restricted GitHub Pages CORS added. Independent review capture/evaluation remains offline; configured credentials and reviewed labels are still required.

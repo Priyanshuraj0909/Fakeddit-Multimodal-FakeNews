@@ -10,11 +10,13 @@ from time import perf_counter
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from backend.app.schemas.text import TextInput
 from backend.app.schemas.detection import DetectionInput
 from backend.app.services import verification
 from backend.app.core.rate_limit import ResearchLimit, research_identity
 from backend.app.core.observability import RequestTelemetry
+from backend.app.core.tracing import stage, attributes, configuration as tracing_configuration, current_trace_id
 from ml.inference import portable_text
 from starlette.concurrency import run_in_threadpool
 
@@ -25,10 +27,14 @@ from backend.app.api.uploads import router as upload_router, UploadBodyLimit, im
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_MODEL_DIR = ROOT / "models/exported/text-baseline"
 MODEL_DIR = Path(os.environ.get("FAKEDDIT_MODEL_DIR", str(DEFAULT_MODEL_DIR)))
-app = FastAPI(title="Fakeddit Fake News Detector API", version="2.2.0")
+app = FastAPI(title="Fakeddit Fake News Detector API", version="2.3.0")
 logger = logging.getLogger(__name__)
 research_limit = ResearchLimit()
 app.add_middleware(UploadBodyLimit)
+app.add_middleware(CORSMiddleware,
+                   allow_origins=[origin.strip() for origin in os.environ.get('FAKEDDIT_CORS_ORIGINS', 'https://priyanshuraj0909.github.io').split(',') if origin.strip()],
+                   allow_methods=['GET', 'HEAD', 'POST'], allow_headers=['Content-Type'],
+                   expose_headers=['x-request-id', 'x-trace-id'], allow_credentials=False)
 app.add_middleware(RequestTelemetry)
 app.include_router(upload_router)
 
@@ -50,9 +56,9 @@ def health():
     if use_portable():
         try:
             portable_text.load_release(str(portable_text.RELEASE))
-            return {"status": "ok", "model_available": True, "model_status": "ready", "model_kind": "portable_fakeddit_text", "version": "2.2.0"}
+            return {"status": "ok", "model_available": True, "model_status": "ready", "model_kind": "portable_fakeddit_text", "version": "2.3.0"}
         except (ValueError, OSError, KeyError):
-            return {"status": "ok", "model_available": False, "model_status": "invalid_artifacts", "version": "2.2.0"}
+            return {"status": "ok", "model_available": False, "model_status": "invalid_artifacts", "version": "2.3.0"}
     dependencies = all(find_spec(name) is not None for name in ("joblib", "sklearn", "numpy", "scipy"))
     artifacts = all((MODEL_DIR / name).is_file() for name in ("model.joblib", "metrics.json"))
     reason = "missing_artifacts" if not artifacts else "missing_dependencies" if not dependencies else "ready"
@@ -62,7 +68,7 @@ def health():
         except Exception:
             logger.exception("Text checkpoint readiness failed")
             reason = "invalid_artifacts"
-    return {"status": "ok", "model_available": reason == "ready", "model_status": reason, "version": "2.2.0"}
+    return {"status": "ok", "model_available": reason == "ready", "model_status": reason, "version": "2.3.0"}
 
 
 @app.get("/api/capabilities")
@@ -79,6 +85,7 @@ def capabilities():
         "fact_verification": verification.configuration()['available'],
         "verification": verification.configuration(),
         "research_quota": research_limit.status(),
+        "tracing": tracing_configuration(),
         "news_detection": True,
         "limits": {"text_characters": 10000, "image_bytes": 10 * 1024 * 1024, "inference_image_bytes": image_upload_limit(), "video_bytes": 50 * 1024 * 1024},
         "note": "Reports describe language and supplied media metadata. They do not establish factual truth.",
@@ -145,6 +152,7 @@ def load_model(directory: str):
 
 
 @app.post("/api/predict")
+@stage('model.classify')
 def predict(payload: TextInput):
     text = clean_text(payload.text)
     readiness = health()
@@ -192,12 +200,17 @@ async def detect_news(payload: DetectionInput, request: Request):
     config = verification.configuration()
     research_start = perf_counter()
     identity = research_identity(request)
-    if config['available'] and not await run_in_threadpool(research_limit.allow, identity):
-        evidence = verification.unavailable(research_limit.failure_reason)
-    else:
-        evidence = await verification.verify(text, payload.source_url, payload.publication_date)
+    with stage('verification') as span:
+        with stage('research.quota'):
+            permitted = not config['available'] or await run_in_threadpool(research_limit.allow, identity)
+        if not permitted:
+            evidence = verification.unavailable(research_limit.failure_reason)
+        else:
+            evidence = await verification.verify(text, payload.source_url, payload.publication_date)
+        attributes(span, **{'operation.status': evidence['status'], 'operation.reason': evidence.get('reason', 'completed'),
+                             'source.count': len(evidence.get('sources', [])), 'claim.count': len(evidence.get('claims', []))})
     logging.getLogger('fakeddit.requests').info(json.dumps({
-        'event': 'verification_result', 'request_id': getattr(request.state, 'request_id', None),
+        'event': 'verification_result', 'request_id': getattr(request.state, 'request_id', None), 'trace_id': current_trace_id(),
         'status': evidence.get('status'), 'reason': evidence.get('reason'),
         'duration_ms': round((perf_counter()-research_start)*1000, 2)}))
     return {"mode": "news_detection", "model_assessment": model, "verification": evidence,

@@ -50,6 +50,14 @@ export function validateAnalysis(data) {
   return data;
 }
 
+export function apiPath(path, configuredBase = globalThis.document?.querySelector('meta[name="fakeddit-api-base"]')?.content || '') {
+  if (!path.startsWith('/api/') || path.includes('\\') || path.includes('..')) throw new Error('Invalid API path.');
+  if (!configuredBase) return path;
+  const base = new URL(configuredBase);
+  if (base.protocol !== 'https:' || base.username || base.password || base.pathname !== '/' || base.search || base.hash) throw new Error('Invalid API server configuration.');
+  return base.origin + path;
+}
+
 export async function requestJSON(path, { text, image, source_url, publication_date, signal, timeout = 20000 } = {}) {
   const controller = new AbortController();
   const abort = () => controller.abort();
@@ -63,7 +71,7 @@ export async function requestJSON(path, { text, image, source_url, publication_d
       body = new FormData();
       body.append('text', text); body.append('image', image, image.name);
     } else if (text !== undefined) body = JSON.stringify({ text, ...(source_url !== undefined ? { source_url } : {}), ...(publication_date !== undefined ? { publication_date } : {}) });
-    const response = await fetch(path, {
+    const response = await fetch(apiPath(path), {
       method: text === undefined ? 'GET' : 'POST',
       ...(body === undefined ? {} : { body }),
       ...(body !== undefined && !image ? { headers: { 'Content-Type': 'application/json' } } : {}),

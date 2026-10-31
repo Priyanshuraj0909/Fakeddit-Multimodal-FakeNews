@@ -3,6 +3,7 @@ import json
 import logging
 from time import perf_counter
 from uuid import uuid4
+from backend.app.core.tracing import stage, attributes, current_trace_id
 
 logger = logging.getLogger('fakeddit.requests')
 if not logger.handlers:
@@ -28,12 +29,22 @@ class RequestTelemetry:
             if message['type'] == 'http.response.start':
                 status = message['status']
                 message.setdefault('headers', []).append((b'x-request-id', request_id.encode()))
+                trace_id = current_trace_id()
+                if trace_id:
+                    message['headers'].append((b'x-trace-id', trace_id.encode()))
             await send(message)
 
-        try:
-            await self.app(scope, receive, response)
-        finally:
-            route = scope.get('route')
-            logger.info(json.dumps({'request_id': request_id, 'method': scope['method'],
-                                    'route': getattr(route, 'path', 'unmatched'), 'status': status,
-                                    'duration_ms': round((perf_counter()-start)*1000, 2)}))
+        method = scope['method'] if scope['method'] in {'GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'} else 'OTHER'
+        with stage('http.request', **{'request.id': request_id, 'http.request.method': method}) as span:
+            try:
+                await self.app(scope, receive, response)
+            finally:
+                route = scope.get('route')
+                route_path = getattr(route, 'path', 'unmatched')
+                attributes(span, **{'http.route': route_path, 'http.response.status_code': status})
+                if span is not None and status >= 500:
+                    from opentelemetry.trace import Status, StatusCode
+                    span.set_status(Status(StatusCode.ERROR, 'Server response error'))
+                logger.info(json.dumps({'request_id': request_id, 'trace_id': current_trace_id(), 'method': method,
+                                        'route': route_path, 'status': status,
+                                        'duration_ms': round((perf_counter()-start)*1000, 2)}))
