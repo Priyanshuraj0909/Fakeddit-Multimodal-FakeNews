@@ -14,6 +14,6 @@ Updated 2026-10-31. Engineering availability is separate from real-model readine
 | 07 Frontend | Detector, editable OCR and optional local history implemented | [Details](docs/phases/PHASE_07_FRONTEND.md) |
 | 08 Explainability | Text contributions implemented; image attribution pending | [Details](docs/phases/PHASE_08_EXPLAINABILITY.md) |
 | 09 Testing | Automated suites implemented | [Details](docs/phases/PHASE_09_TESTING.md) |
-| 10 Deployment | Vercel verified; GitHub Pages workflow prepared; Docker pending | [Details](docs/phases/PHASE_10_DEPLOYMENT.md) |
+| 10 Deployment | Vercel and GitHub Pages deployments verified; Docker pending | [Details](docs/phases/PHASE_10_DEPLOYMENT.md) |
 
 Next: scale and externally validate the real paired pilot; obtain consistency-specific benchmark labels; collect independent human-reviewed evidence assessments; validate on fresh external data; exploratory unseen-group and chronological results are recorded. Calibration and observational generalization audits are recorded, while production uses the original scores. Text-v1 has real subset evaluation recorded in docs/TEXT_MODEL_RELEASE.json.

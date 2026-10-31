@@ -1,6 +1,6 @@
 # Phase 10: Deployment
 
-Status: Vercel deployment and GitHub CI verified; Docker remains unverified. Updated 2026-10-31.
+Status: Vercel and GitHub Pages deployments and GitHub CI verified; Docker remains unverified. Updated 2026-10-31.
 
 Deliverable: Vercel entrypoint, Docker configuration, GitHub CI and ignored model/data assets.
 
