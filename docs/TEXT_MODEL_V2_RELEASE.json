@@ -1,0 +1,200 @@
+{
+  "release": "text-v2",
+  "released_at": "2026-10-31T16:28:00.822540+00:00",
+  "metrics": {
+    "model": "Word + character TF-IDF / balanced Logistic Regression",
+    "seed": 42,
+    "selected_C": 1.0,
+    "validation_accuracy": 0.8304666666666667,
+    "validation_macro_f1": 0.8291896054085544,
+    "test_accuracy": 0.8335333333333333,
+    "test_macro_f1": 0.8323141896726591,
+    "rows": {
+      "train": 502605,
+      "validation": 15000,
+      "test": 15000
+    },
+    "classification_report": {
+      "0": {
+        "precision": 0.8633174642946629,
+        "recall": 0.8305411594552248,
+        "f1-score": 0.8466121997665704,
+        "support": 8297.0
+      },
+      "1": {
+        "precision": 0.7996580222285552,
+        "recall": 0.8372370580337163,
+        "f1-score": 0.818016179578748,
+        "support": 6703.0
+      },
+      "accuracy": 0.8335333333333333,
+      "macro avg": {
+        "precision": 0.831487743261609,
+        "recall": 0.8338891087444705,
+        "f1-score": 0.8323141896726591,
+        "support": 15000.0
+      },
+      "weighted avg": {
+        "precision": 0.8348701816167217,
+        "recall": 0.8335333333333333,
+        "f1-score": 0.8338335915453056,
+        "support": 15000.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        6891,
+        1406
+      ],
+      [
+        1091,
+        5612
+      ]
+    ],
+    "labels": {
+      "0": "Likely fake / misleading",
+      "1": "Likely real"
+    },
+    "task": "fakeddit_binary",
+    "selection_metric": "validation_macro_f1",
+    "preprocessing": "Independent word (1,2) and character-within-word (3,5) sublinear TF-IDF, each L2-normalized and fitted on training only",
+    "word_features": 100000,
+    "character_features": 100000,
+    "class_weight": "balanced"
+  },
+  "provenance": {
+    "dataset": "Official Fakeddit v2 multimodal-only samples, text branch only",
+    "source": "https://github.com/entitize/Fakeddit",
+    "seed": 42,
+    "labels": {
+      "0": "Likely fake / misleading",
+      "1": "Likely real"
+    },
+    "label_source": "https://github.com/entitize/Fakeddit/issues/14#issuecomment-815355653; all rows verified: binary 1 iff six-way label 0 (true)",
+    "sampling": "Fixed-seed subsets within official splits after ID and normalized exact-text exclusion",
+    "splits": {
+      "train": {
+        "source": "data/raw/multimodal_train.tsv",
+        "source_sha256": "9894cb4aa2f901c6f29b61ac3d95ce9f7e78c43be8062ae5deb1c219c82497bb",
+        "original_rows": 564000,
+        "eligible_rows": 502605,
+        "excluded_rows": 61395,
+        "selected_rows": 502605,
+        "class_counts": {
+          "0": 284879,
+          "1": 217726
+        }
+      },
+      "validation": {
+        "source": "data/raw/multimodal_validate.tsv",
+        "source_sha256": "c70140ec376e083e3780b5b488c96c8933678ca5800139bfb78c92e95df6946e",
+        "original_rows": 59342,
+        "eligible_rows": 50964,
+        "excluded_rows": 8378,
+        "selected_rows": 15000,
+        "class_counts": {
+          "0": 8335,
+          "1": 6665
+        }
+      },
+      "test": {
+        "source": "data/raw/multimodal_test_public.tsv",
+        "source_sha256": "bc92378e070ca7b1a7497053d1c34cdc3f550be6232a76791a2c722d6d9bbf94",
+        "original_rows": 59319,
+        "eligible_rows": 50806,
+        "excluded_rows": 8513,
+        "selected_rows": 15000,
+        "class_counts": {
+          "0": 8297,
+          "1": 6703
+        }
+      }
+    }
+  },
+  "selection": {
+    "frozen_at": "2026-10-31T16:27:18.188156+00:00",
+    "parameters": {
+      "mode": "word_char",
+      "C": 1.0,
+      "class_weight": "balanced",
+      "validation_macro_f1": 0.8291896054085544,
+      "validation_accuracy": 0.8304666666666667,
+      "training_rows": 502605,
+      "word_features": 100000,
+      "character_features": 100000
+    },
+    "model_sha256": "69935bb9584da2f534e99a64225d20d89873c90a319673df63e8bfdb0a83ab25",
+    "split_hashes": {
+      "train": "e301bfc1c3baf7c126456da7a0e5d84fedcff91e2c424ee1ecf6b53af34ed21c",
+      "validation": "f2535acc279443d4cb772a27ef02b35b0fdd8885fbd4ae474bf9f64ef894f163",
+      "test": "5776044d0353f4f36fde7f53ab2edd2be662a9fe9e6a7d6fcf2ec5e4186b630c"
+    }
+  },
+  "comparison_to_text_v1": {
+    "accuracy_delta": 0.027066666666666666,
+    "bootstrap_95_interval": [
+      0.022265,
+      0.032
+    ],
+    "bootstrap_resamples": 2000,
+    "new_only_correct": 922,
+    "baseline_only_correct": 516,
+    "mcnemar_exact_p": 5.788687420288738e-27
+  },
+  "promotion_checks": {
+    "validation_improved": true,
+    "test_accuracy_improved": true,
+    "test_macro_f1_improved": true,
+    "paired_accuracy_interval_positive": true,
+    "class_recall_noninferior": true,
+    "temporal_macro_f1_noninferior": true
+  },
+  "policy_evaluation": {
+    "total_test_rows": 15000,
+    "usable_rows": 13544,
+    "confident_rows": 11121,
+    "confident_coverage": 0.7414,
+    "accuracy_among_confident_rows": 0.8822048376944519,
+    "note": "Separate fixed 0.65/coverage heuristic; headline benchmark accuracy uses all 15,000 rows, not this accepted subset."
+  },
+  "artifact": {
+    "path": "backend/app/models/releases/text-v2.json.gz",
+    "sha256": "d7c70eb25c2b59dadc2786f1f96abc6b9eaf46f7e168a31e0feb3065e15f91f6",
+    "bytes": 3310051,
+    "parity_check": {
+      "inputs": 502,
+      "compared": 456,
+      "abstained": 46,
+      "maximum_probability_error": 9.992007221626409e-16,
+      "source": "First 500 validation headlines plus whitespace cases; no model selection uses this check"
+    },
+    "warm_inference_ms": {
+      "rows": 501,
+      "median": 0.07870903937146068,
+      "p95": 0.17837499035522342
+    }
+  },
+  "limitations": [
+    "Historical test has been evaluated in prior releases; no newly collected independent labels are available.",
+    "Preprocessing and NB feature ratios are fitted only on training; source/author metadata is never used as a model feature.",
+    "Post-test outcomes cannot change candidate parameters; a failed promotion gate preserves the current deployed release.",
+    "Distant Reddit labels/source shortcuts remain; metrics concern dataset classification, not factual truth.",
+    "Chronological and unseen-group subsets have been used in prior exploratory research.",
+    "Fake/misleading-class recall declined 1.63 percentage points while real-class recall improved 8.07 points.",
+    "Calibration experiments in TEXT_RELIABILITY_EVALUATION.json concern text-v1, not this release."
+  ],
+  "environment": {
+    "packages": {
+      "scikit-learn": "1.9.1",
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "joblib": "1.6.0"
+    },
+    "device": "CPU",
+    "architecture": "arm64",
+    "training_thread_environment": {
+      "OPENBLAS_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1"
+    }
+  }
+}

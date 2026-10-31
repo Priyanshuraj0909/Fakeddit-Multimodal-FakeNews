@@ -131,7 +131,7 @@ def test_model_card_and_request_ids_expose_release_facts():
     response = client.get('/api/model-card')
     assert response.status_code == 200
     assert len(response.headers['x-request-id']) == 32
-    assert response.json()['release'] == 'text-v1'
+    assert response.json()['release'] == 'text-v2'
     assert response.json()['metrics']['rows']['test'] == 15000
 
 
@@ -202,3 +202,15 @@ def test_telemetry_correlates_verification_without_logging_submitted_content(mon
     assert evidence['reason'] == 'missing_api_key'
     assert 'PRIVATE_SUBMITTED_NEWS_MARKER' not in output.getvalue()
     assert all('duration_ms' in event for event in events)
+
+
+def test_active_release_manifest_matches_the_bundled_artifact_and_history():
+    from ml.utils.contracts import digest_file
+    card = client.get('/api/model-card').json()
+    artifact = portable_text.load_release(str(portable_text.RELEASE))
+    assert card['release'] == artifact['release'] == 'text-v2'
+    assert card['artifact_sha256'] == digest_file(portable_text.RELEASE)
+    assert card['metrics']['test_accuracy'] == artifact['metrics']['test_accuracy']
+    assert card['metrics']['rows']['train'] == 502605
+    assert card['historical_evaluation_releases']['reliability_evaluation'] == 'text-v1'
+    assert all(card['accuracy_improvement']['promotion_checks'].values())

@@ -7,7 +7,7 @@ Updated 2026-10-31. Engineering availability is separate from real-model readine
 | 00 Audit | Engineering complete | [Details](docs/phases/PHASE_00_AUDIT.md) |
 | 01 Foundation | Engineering complete | [Details](docs/phases/PHASE_01_FOUNDATION.md) |
 | 02 Data | Official text splits downloaded and prepared | [Details](docs/phases/PHASE_02_DATA.md) |
-| 03 Text model | Evaluated text-v1 release implemented | [Details](docs/phases/PHASE_03_TEXT_MODEL.md) |
+| 03 Text model | Validation-selected text-v2 improvement packaged; text-v1 preserved | [Details](docs/phases/PHASE_03_TEXT_MODEL.md) |
 | 04 Image model | CLIP image-only pilot evaluated; full release pending | [Details](docs/phases/PHASE_04_IMAGE_MODEL.md) |
 | 05 Multimodal | Small paired pilot evaluated; deployment/external validation pending | [Details](docs/phases/PHASE_05_MULTIMODAL.md) |
 | 06 Backend | Detector, verification and operational tracing implemented | [Details](docs/phases/PHASE_06_BACKEND.md) |
@@ -16,4 +16,4 @@ Updated 2026-10-31. Engineering availability is separate from real-model readine
 | 09 Testing | Automated suites implemented | [Details](docs/phases/PHASE_09_TESTING.md) |
 | 10 Deployment | Vercel and GitHub Pages deployments verified; Docker pending | [Details](docs/phases/PHASE_10_DEPLOYMENT.md) |
 
-Next: scale and externally validate the real paired pilot; obtain consistency-specific benchmark labels; collect independent human-reviewed evidence assessments; validate on fresh external data; exploratory unseen-group and chronological results are recorded. Calibration and observational generalization audits are recorded, while production uses the original scores. Text-v1 has real subset evaluation recorded in docs/TEXT_MODEL_RELEASE.json.
+Next: scale and externally validate the real paired pilot; obtain consistency-specific benchmark labels; collect independent human-reviewed evidence assessments; validate on fresh external data; exploratory unseen-group and chronological results are recorded. Calibration and observational generalization audits are recorded, while production uses the original scores. Text-v2 improves the historical test benchmark to 83.35% accuracy; see docs/TEXT_MODEL_V2_RELEASE.json. Original text-v1 evidence is preserved. Fresh external factual accuracy remains unmeasured.

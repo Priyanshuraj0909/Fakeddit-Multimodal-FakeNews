@@ -27,7 +27,7 @@ from backend.app.api.uploads import router as upload_router, UploadBodyLimit, im
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_MODEL_DIR = ROOT / "models/exported/text-baseline"
 MODEL_DIR = Path(os.environ.get("FAKEDDIT_MODEL_DIR", str(DEFAULT_MODEL_DIR)))
-app = FastAPI(title="Fakeddit Fake News Detector API", version="2.3.0")
+app = FastAPI(title="Fakeddit Fake News Detector API", version="2.4.0")
 logger = logging.getLogger(__name__)
 research_limit = ResearchLimit()
 app.add_middleware(UploadBodyLimit)
@@ -56,9 +56,9 @@ def health():
     if use_portable():
         try:
             portable_text.load_release(str(portable_text.RELEASE))
-            return {"status": "ok", "model_available": True, "model_status": "ready", "model_kind": "portable_fakeddit_text", "version": "2.3.0"}
+            return {"status": "ok", "model_available": True, "model_status": "ready", "model_kind": "portable_fakeddit_text", "version": "2.4.0"}
         except (ValueError, OSError, KeyError):
-            return {"status": "ok", "model_available": False, "model_status": "invalid_artifacts", "version": "2.3.0"}
+            return {"status": "ok", "model_available": False, "model_status": "invalid_artifacts", "version": "2.4.0"}
     dependencies = all(find_spec(name) is not None for name in ("joblib", "sklearn", "numpy", "scipy"))
     artifacts = all((MODEL_DIR / name).is_file() for name in ("model.joblib", "metrics.json"))
     reason = "missing_artifacts" if not artifacts else "missing_dependencies" if not dependencies else "ready"
@@ -68,7 +68,7 @@ def health():
         except Exception:
             logger.exception("Text checkpoint readiness failed")
             reason = "invalid_artifacts"
-    return {"status": "ok", "model_available": reason == "ready", "model_status": reason, "version": "2.3.0"}
+    return {"status": "ok", "model_available": reason == "ready", "model_status": reason, "version": "2.4.0"}
 
 
 @app.get("/api/capabilities")
@@ -95,7 +95,7 @@ def capabilities():
 @app.get('/api/model-card')
 def model_card():
     """Release facts, distinct from runtime readiness and live evidence verification."""
-    provenance_path = ROOT / 'docs/TEXT_MODEL_RELEASE.json'
+    provenance_path = ROOT / 'docs' / portable_text.MANIFEST_FILENAME
     if not provenance_path.is_file():
         raise HTTPException(status_code=503, detail='Model release provenance is unavailable')
     provenance = json.loads(provenance_path.read_text())
@@ -103,6 +103,8 @@ def model_card():
     evaluation = json.loads(evaluation_path.read_text()) if evaluation_path.is_file() else None
     shift_path = ROOT / 'docs/TEXT_SHIFT_EVALUATION.json'
     shift = json.loads(shift_path.read_text()) if shift_path.is_file() else None
+    improvement_path = ROOT / 'docs/TEXT_MODEL_V2_EVALUATION.json'
+    improvement = json.loads(improvement_path.read_text()) if improvement_path.is_file() else None
     pilot_path = ROOT / 'docs/MULTIMODAL_PILOT_EVALUATION.json'
     pilot = json.loads(pilot_path.read_text()) if pilot_path.is_file() else None
     comparison_path = ROOT / 'docs/MULTIMODAL_PILOT_COMPARISON.json'
@@ -112,6 +114,8 @@ def model_card():
             'runtime': health(), 'score_type': 'uncalibrated_model_scores',
             'reliability_evaluation': evaluation,
             'shift_evaluation': shift,
+            'historical_evaluation_releases': {'reliability_evaluation': 'text-v1', 'shift_evaluation': 'text-v1'},
+            'accuracy_improvement': improvement,
             'offline_multimodal_pilot': ({'status': pilot['status'], 'production_model_changed': False,
                                           'metrics': pilot['metrics'], 'resources': pilot['resources'],
                                           'comparison': comparison, 'limitations': pilot['limitations']} if pilot else None),
@@ -119,7 +123,8 @@ def model_card():
                             'Dataset labels do not establish factual truth.',
                             'Source-label shortcuts and time shift limit generalization; review the recorded stress tests.',
                             'No evaluated paired image release is bundled.',
-                            'Calibration experiments do not change the production model.']}
+                            'The linked calibration and original shift reports concern text-v1; text-v2 scores remain uncalibrated.',
+                            'Historical test data was reused for regression evaluation; fresh external factual accuracy remains unmeasured.']}
 
 
 

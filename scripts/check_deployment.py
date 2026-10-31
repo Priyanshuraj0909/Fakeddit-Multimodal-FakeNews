@@ -32,7 +32,7 @@ def check(base_url, require_verification=False):
             raise RuntimeError(f'{path}: empty asset')
     capabilities = json.loads(request('/api/capabilities'))
     card = json.loads(request('/api/model-card'))
-    if card.get('release') != 'text-v1' or card.get('score_type') != 'uncalibrated_model_scores':
+    if card.get('release') != 'text-v2' or card.get('score_type') != 'uncalibrated_model_scores':
         raise RuntimeError('Model card did not return the expected release contract')
     if capabilities.get('text_analysis') is not True or capabilities.get('media_inspection') != 'browser_local':
         raise RuntimeError('Capabilities endpoint did not return supported modes')

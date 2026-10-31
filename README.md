@@ -15,9 +15,9 @@
 
 | Test accuracy | Test macro F1 | Train / validation / test |
 | :---: | :---: | :---: |
-| **80.65%** | **0.8031** | **150,000 / 15,000 / 15,000** |
+| **83.35%** | **0.8323** | **502,605 / 15,000 / 15,000** |
 
-<sub>Recorded text-v1 results on independent Fakeddit subsets. Dataset classification performance is not real-world fact-checking accuracy.</sub>
+<sub>Recorded text-v2 results on the existing Fakeddit test split. Historical test data is reused for regression evaluation; fresh external factual accuracy remains unmeasured.</sub>
 
 </div>
 
@@ -29,7 +29,7 @@ Misinformation can appear in a headline, an image, or the relationship between t
 
 Fakeddit brings these approaches into a FastAPI application with a browser workspace and offline ML tools. The main detector produces two independent assessments:
 
-1. **Model prediction:** a bundled TF-IDF + Logistic Regression model assesses English headline patterns, with uncertainty, abstention, and signed feature contributions.
+1. **Model prediction:** a bundled word + character TF-IDF / Logistic Regression model assesses English headline patterns, with uncertainty, abstention, and signed feature contributions.
 2. **Claim verification:** when configured, Groq browser research retrieves sources and assesses up to five central claims, retaining citations and evidence limitations.
 
 Model and evidence results can disagree. The application does not combine them into a truth probability. Original notebooks and historical results are preserved alongside the newer pipeline, release provenance, API contracts, and automated tests.
@@ -53,7 +53,7 @@ Model and evidence results can disagree. The application does not combine them i
 
 | Capability | Status | What is available |
 | --- | --- | --- |
-| Text classification | Implemented; evaluated release bundled | TF-IDF + Logistic Regression; likely fake/misleading or likely real dataset classes |
+| Text classification | Implemented; evaluated release bundled | Word + character TF-IDF / balanced Logistic Regression; likely fake/misleading or likely real dataset classes |
 | Uncertainty and abstention | Implemented | Scores below 0.65 are uncertain; unusable text receives no verdict |
 | Text feature contributions | Implemented | Signed contributions to the linear model score, separate from factual evidence |
 | Claim verification | Implemented; requires `GROQ_API_KEY` | Source research, per-claim verdicts, citations, and explicit provider failure status |
@@ -138,11 +138,15 @@ flowchart LR
     J --> API[Portable API inference]
 ```
 
-The text-v1 release uses `clean_title`, unigram/bigram features, sublinear term frequency, L2 normalization, and a maximum of 40,000 vocabulary features. Candidates use `C ∈ {0.1, 1, 10}`; validation macro F1 selected **C = 1.0**, with seed **42**.
+The active **text-v2** model combines 100,000 word unigram/bigram features with 100,000 character-within-word 3–5-gram features. Each TF-IDF branch is fitted on training only and independently L2-normalized; balanced Logistic Regression uses C=1.0. Fixed word-only, word/character, NB-weighted and class-weighted candidates were compared using validation macro F1, followed by a larger-training refit. The winner uses all **502,605** eligible official training headlines while keeping the original validation/test files byte-identical.
+
+The versioned **3,310,051-byte** safe gzip-JSON artifact retains dependency-free serving. Export parity compared 456 usable inputs from 502 validation/whitespace cases (46 policy abstentions), with maximum score error below 1e-14. Original text-v1 weights and results remain available as provenance. See [text-v2 manifest](docs/TEXT_MODEL_V2_RELEASE.json) and [full comparison](docs/TEXT_MODEL_V2_EVALUATION.json).
+
+The preserved historical text-v1 release uses `clean_title`, unigram/bigram features, sublinear term frequency, L2 normalization, and a maximum of 40,000 vocabulary features. Candidates use `C ∈ {0.1, 1, 10}`; validation macro F1 selected **C = 1.0**, with seed **42**.
 
 For a term occurring `tf` times, the vectorizer uses sublinear frequency `1 + log(tf)` and smoothed inverse document frequency `log((1 + N) / (1 + df)) + 1`, then normalizes the document vector. Logistic Regression computes `P(class 1 | x) = 1 / (1 + exp(-(w·x + b)))`. These scores have not been calibrated as probabilities of factual truth.
 
-The 659,355-byte portable artifact stores vocabulary, IDF weights, coefficients, and provenance as gzip JSON. Its recorded export check compared 200 held-out headlines with scikit-learn, with maximum absolute probability error below `1e-10`. Full joblib checkpoints and research weights remain ignored. See [release manifest](docs/TEXT_MODEL_RELEASE.json).
+The preserved 659,355-byte text-v1 artifact stores vocabulary, IDF weights, coefficients, and provenance as gzip JSON. Its recorded export check compared 200 held-out headlines with scikit-learn, with maximum absolute probability error below `1e-10`. Full joblib checkpoints and research weights remain ignored. See [release manifest](docs/TEXT_MODEL_RELEASE.json).
 
 For portable inference, fewer than three tokens, zero usable features, or vocabulary coverage below 20% causes abstention. A maximum class score below 0.65 is marked uncertain. These thresholds are product heuristics, not a measured calibration guarantee.
 
@@ -161,29 +165,36 @@ Raw datasets and downloaded images are **not committed**. Distant labels, Reddit
 
 ## Model performance
 
-Classification values below come from [the recorded text-v1 release](docs/TEXT_MODEL_RELEASE.json). A separate [reliability experiment](docs/TEXT_RELIABILITY_EVALUATION.json) selected sigmoid calibration on a held-out validation half: test Brier score changed from 0.13851 to 0.13688. Production retains raw scores and the 0.65 heuristic. See [evaluation protocol and limitations](docs/EVALUATION.md).
+The active [text-v2 release](docs/TEXT_MODEL_V2_RELEASE.json) improves the existing regression benchmark after selection on validation macro F1. All 15,000 test headlines are included in the accuracy calculation; changing the uncertainty threshold did not create this gain.
 
-| Split | Samples | Accuracy | Macro F1 |
+| Model | Training rows | Validation accuracy / macro F1 | Test accuracy / macro F1 |
 | --- | ---: | ---: | ---: |
-| Training | 150,000 | Not recorded | Not recorded |
-| Validation | 15,000 | 80.84% | 0.8054 |
-| Test | 15,000 | **80.65%** | **0.8031** |
+| Historical text-v1 | 150,000 | 80.84% / 0.8054 | 80.65% / 0.8031 |
+| Active text-v2 | 502,605 | 83.05% / 0.8292 | **83.35% / 0.8323** |
 
-| Test class | Precision | Recall | F1 | Support |
+The gain is **2.71 percentage points**, or **406 additional correctly classified headlines**. Its paired-bootstrap 95% accuracy-difference interval is **+2.23 to +3.20 points** (2,000 resamples; exact McNemar p≈5.79e-27). These paired-example estimates do not capture source-cluster or newly collected external-data uncertainty.
+
+| Text-v2 test class | Precision | Recall | F1 | Support |
 | --- | ---: | ---: | ---: | ---: |
-| Fake / misleading (`0`) | 0.8115 | 0.8468 | 0.8288 | 8,297 |
-| Real (`1`) | 0.7996 | 0.7565 | 0.7775 | 6,703 |
-| Macro average | 0.8055 | 0.8017 | 0.8031 | 15,000 |
-| Weighted average | 0.8062 | 0.8065 | 0.8058 | 15,000 |
+| Fake / misleading (`0`) | 0.8633 | 0.8305 | 0.8466 | 8,297 |
+| Real (`1`) | 0.7997 | 0.8372 | 0.8180 | 6,703 |
+| Macro average | 0.8315 | 0.8339 | 0.8323 | 15,000 |
+| Weighted average | 0.8349 | 0.8335 | 0.8338 | 15,000 |
 
-**Confusion matrix** — rows are actual labels; columns are predicted labels:
+Real-class recall improves **8.07 points**; fake/misleading recall declines **1.63 points**, within the predeclared two-point noninferiority margin. This is a tradeoff, not an across-the-board improvement.
+
+**Text-v2 confusion matrix** — actual labels in rows, predicted labels in columns:
 
 | Actual ↓ / Predicted → | Fake / misleading | Real |
 | --- | ---: | ---: |
-| Fake / misleading | 7,026 | 1,271 |
-| Real | 1,632 | 5,071 |
+| Fake / misleading | 6,891 | 1,406 |
+| Real | 1,091 | 5,612 |
 
-These are conventional held-out classification metrics, not a separate evaluation of the UI's abstention policy or Groq verification. A small exploratory multimodal pilot is now recorded below; no full-corpus or deployed multimodal accuracy is claimed. Historical notebook results, including the previously reported 93.9%, are not comparable release metrics; [the historical review](PROJECT_REVIEW.md) documents evaluation and leakage concerns.
+On an equal-data exploratory chronological refit (290,234 pre-2018 training rows, 8,536 earlier validation rows, 6,406 later test rows), the word baseline scored 56.87% accuracy / 0.5559 macro F1 and the upgraded architecture scored **58.98% / 0.5871**. Architecture selection used overall validation, so this is exploratory rather than a fresh date-blind external benchmark. Temporal weakness remains substantial.
+
+The fixed usability/0.65 policy accepts 74.14% of the historical test examples at 88.22% accuracy among that accepted subset; this is **coverage-dependent selective accuracy**, not the headline 83.35% all-example benchmark. New scores remain uncalibrated. Earlier [calibration measurements](docs/TEXT_RELIABILITY_EVALUATION.json) apply to text-v1 only. See [evaluation protocol](docs/EVALUATION.md).
+
+No new independent human-reviewed factual test set was collected. Dataset/source-label shortcuts, distant labels and previously evaluated test data still limit conclusions. Original [text-v1 results](docs/TEXT_MODEL_RELEASE.json), historical notebooks and the [historical review](PROJECT_REVIEW.md) remain provenance; the earlier 93.9% notebook result is not a current release metric.
 
 ## Multimodal research pilot
 
@@ -197,7 +208,7 @@ The [recorded CLIP + XGBoost pilot](docs/MULTIMODAL_PILOT_EVALUATION.json) uses 
 
 The observed combined-versus-text macro-F1 difference is +0.0251. Its paired-bootstrap 95% interval is **−0.0300 to +0.0801**, and the exact McNemar p-value is **0.4731**. This pilot does **not establish a reliable image benefit**. See [paired uncertainty comparison](docs/MULTIMODAL_PILOT_COMPARISON.json).
 
-On this arm64 Mac, five warmed CPU encoding + classifier measurements had median **55.49 ms** and p95 **64.33 ms**; process-wide peak RSS was **959 MB**. The encoder weights are **605 MB**. These are small local timing samples, not a hosted performance guarantee. Raw images, features and full weights remain ignored; Vercel continues to serve text-v1. Pilot scores cannot be compared directly to the differently sampled text-v1 benchmark or interpreted as factual verification accuracy.
+On this arm64 Mac, five warmed CPU encoding + classifier measurements had median **55.49 ms** and p95 **64.33 ms**; process-wide peak RSS was **959 MB**. The encoder weights are **605 MB**. These are small local timing samples, not a hosted performance guarantee. Raw images, features and full weights remain ignored; Vercel uses the compact text release; the CLIP pilot remains offline. Pilot scores cannot be compared directly to the differently sampled text-v1 benchmark or interpreted as factual verification accuracy.
 
 ## Generalization stress tests
 
@@ -241,7 +252,7 @@ On macOS, including Apple Silicon, XGBoost may require OpenMP (`brew install lib
 | --- | --- | --- |
 | `GROQ_API_KEY` | Only for evidence verification | Server-side Groq credential; never expose in frontend code |
 | `GROQ_VERIFICATION_MODEL` | Optional | Defaults to `openai/gpt-oss-20b`; provider must support the required search/structured-output path |
-| `FAKEDDIT_MODEL_DIR` | Optional override | Trusted local text checkpoint directory; omit for bundled text-v1 |
+| `FAKEDDIT_MODEL_DIR` | Optional override | Trusted local text checkpoint directory; omit for bundled text-v2 |
 | `FAKEDDIT_MULTIMODAL_DIR` | Only for paired inference | Exported compatible multimodal classifier directory |
 | `FAKEDDIT_ENCODER_DIR` | Only for paired inference | Complete local CLIP snapshot matching the classifier manifest |
 
@@ -302,7 +313,22 @@ Text must be nonempty and at most 10,000 characters. Schema errors return **422*
 
 ## Training and reproducibility
 
-### Reproduce text-v1
+### Reproduce text-v2
+
+With the official raw files and historical prepared splits/checkpoint available (see the text-v1 procedure below), run the validation-only candidate search into fresh directories:
+
+```bash
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python scripts/improve_text_accuracy.py \
+  --output models/exported/text-accuracy-reproduction \
+  --prepared data/processed/text-accuracy-reproduction
+.venv/bin/python scripts/export_text_v2.py \
+  --directory models/exported/text-accuracy-reproduction \
+  --output artifacts/text-v2-reproduction.json.gz
+```
+
+The exporter refuses failed promotion gates and existing output files. Review [the protocol and limitations](docs/EVALUATION.md) before interpreting the historical regression scores. Serving the bundled release requires no training dependencies.
+
+### Reproduce historical text-v1
 
 Obtain the official files through the publisher and place `multimodal_train.tsv`, `multimodal_validate.tsv`, and `multimodal_test_public.tsv` in `data/raw/`. Install optional training dependencies, then run:
 
@@ -319,7 +345,8 @@ Obtain the official files through the publisher and place `multimodal_train.tsv`
 .venv/bin/python scripts/export_text_release.py \
   --directory models/exported/text-release-v1 \
   --provenance data/processed/text-release-v1/provenance.json \
-  --parity-dataset data/processed/text-release-v1/test.csv
+  --parity-dataset data/processed/text-release-v1/test.csv \
+  --output artifacts/text-v1-reproduction.json.gz
 ```
 
 Use fresh output directories for repeat experiments. Export writes the portable release; review changes deliberately before replacing versioned inference artifacts. The [release manifest](docs/TEXT_MODEL_RELEASE.json) records source hashes, exclusions, sampling, metrics, and artifact checksum. Load joblib files only from trusted training runs.
@@ -339,7 +366,7 @@ The pipeline performs image-first feature concatenation and CPU XGBoost classifi
 
 ## Deployment
 
-The repository contains a Vercel FastAPI entrypoint and serves frontend assets through the API. The configured [public demo](https://fakeddit-multimodal-fakenews.vercel.app) bundles portable text-v1. Set `GROQ_API_KEY` in the server's Vercel Production environment and redeploy to enable evidence research. A Git push alone does not prove successful deployment; verify public behavior with:
+The repository contains a Vercel FastAPI entrypoint and serves frontend assets through the API. The configured [public demo](https://fakeddit-multimodal-fakenews.vercel.app) bundles portable text-v2. Set `GROQ_API_KEY` in the server's Vercel Production environment and redeploy to enable evidence research. A Git push alone does not prove successful deployment; verify public behavior with:
 
 ```bash
 .venv/bin/python scripts/check_deployment.py
@@ -416,7 +443,7 @@ Engineering implementation and real-model readiness are tracked separately in [P
 | Operations | [Deployment](docs/DEPLOYMENT.md), [verification](docs/VERIFICATION.md), [Groq setup](docs/VERIFICATION_SETUP.md) |
 | Research and audit | [Historical review](PROJECT_REVIEW.md), [project audit](docs/PROJECT_AUDIT.md), [repair report](docs/REPAIR_REPORT.md) |
 
-Some historical guides describe earlier artifact availability or paths. For the current bundled text release, use this README, `docs/MODEL.md`, and `docs/TEXT_MODEL_RELEASE.json`; dated reviews remain provenance.
+Some historical guides describe earlier artifact availability or paths. For the current bundled text release, use this README, `docs/MODEL.md`, and `docs/TEXT_MODEL_V2_RELEASE.json`; dated reviews remain provenance.
 
 ## Research credits
 

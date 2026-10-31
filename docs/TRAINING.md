@@ -144,3 +144,20 @@ Use a fresh output directory for repeat experiments. The portable export is inte
 ## Small paired pilot
 
 See [EVALUATION.md](EVALUATION.md) for the bounded Reddit-image acquisition script, pinned official CLIP downloader, CPU extraction/training/resource runner, and paired uncertainty comparison. All resulting images, features and full weights remain in ignored offline directories. A successful small pilot does not enable production image inference or provide image–headline consistency labels.
+
+## Validation-selected accuracy improvement
+
+Requires the official raw files, historical prepared splits and trusted locally trained text-v1 checkpoint (reproduction steps in README). Use new output directories to preserve the recorded experiment:
+
+```bash
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python scripts/improve_text_accuracy.py \
+  --output models/exported/text-accuracy-reproduction \
+  --prepared data/processed/text-accuracy-reproduction
+.venv/bin/python scripts/export_text_v2.py \
+  --directory models/exported/text-accuracy-reproduction \
+  --output artifacts/text-v2-reproduction.json.gz
+```
+
+The protocol/candidate grid and promotion gates are written before training. Candidates are screened only on training/validation, the selected model/hash are frozen before final test scoring, and chronological regularization uses earlier validation only. The historical test is reused as a regression benchmark, so do not describe it as fresh external validation. Full corpus acquisition uses only the original official train split, verifies label mapping, and preserves existing validation/test hashes. Export requires the recorded promotion gates and checks portable probability parity.
+
+The full joblib model is an offline candidate dictionary used by this exporter, not the legacy API joblib override contract. Serve the versioned compact release with FAKEDDIT_MODEL_DIR unset. Heavy training dependencies remain optional. Original text-v1 scripts/artifacts are retained for historical reproduction.

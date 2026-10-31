@@ -52,3 +52,11 @@ Optional paired inference, local encoder extraction, model contracts, upload val
 - Added bounded verification batch capture, transport-failure recording and independent reviewer provenance; correctness metrics remain null without reviews.
 - Extended review worksheets/evaluation to preserve failed runs and measure service outcomes, latency and citation-review coverage.
 - Kept re-ranking, quantization and C2PA as later evaluated work; no new detector accuracy or reviewed dataset is claimed.
+
+## 2.4.0 — 2026-10-31
+
+- Promoted validation-selected word/character text-v2 after preset regression/recall/temporal gates passed; preserved text-v1 artifacts and records.
+- Expanded training to 502,605 eligible official training rows without changing evaluation files; historical test accuracy 80.65% → 83.35%, macro F1 0.8031 → 0.8323.
+- Added reproducible candidate search, frozen selection, paired uncertainty, chronological/unseen-group checks and explicit class-recall tradeoffs.
+- Added dependency-free multi-branch inference and safe 3.31 MB export with sklearn parity checks; character fragments are labeled in explanations.
+- Clearly associated old calibration/shift reports with text-v1. No fresh independent factual benchmark, calibrated truth probability or transformer fine-tuning is claimed.
