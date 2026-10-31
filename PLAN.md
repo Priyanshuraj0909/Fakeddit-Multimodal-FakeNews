@@ -7,7 +7,7 @@ Updated 2026-10-31. Engineering availability is separate from real-model readine
 | 00 Audit | Engineering complete | [Details](docs/phases/PHASE_00_AUDIT.md) |
 | 01 Foundation | Engineering complete | [Details](docs/phases/PHASE_01_FOUNDATION.md) |
 | 02 Data | Official text splits downloaded and prepared | [Details](docs/phases/PHASE_02_DATA.md) |
-| 03 Text model | Validation-selected text-v2 improvement packaged; text-v1 preserved | [Details](docs/phases/PHASE_03_TEXT_MODEL.md) |
+| 03 Text model | Evaluated text-v2 deployed; text-v1 preserved | [Details](docs/phases/PHASE_03_TEXT_MODEL.md) |
 | 04 Image model | CLIP image-only pilot evaluated; full release pending | [Details](docs/phases/PHASE_04_IMAGE_MODEL.md) |
 | 05 Multimodal | Small paired pilot evaluated; deployment/external validation pending | [Details](docs/phases/PHASE_05_MULTIMODAL.md) |
 | 06 Backend | Detector, verification and operational tracing implemented | [Details](docs/phases/PHASE_06_BACKEND.md) |
